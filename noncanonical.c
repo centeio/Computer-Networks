@@ -88,31 +88,31 @@ int main(int argc, char** argv)
 	int n = -1;
 
 	while (STOP==FALSE) {       /* loop for input */
-	printf("Waiting for message...\n");
-	res = read(fd,buf,1);
-	printf("Byte read: %x\n", buf[0]);
-	if(buf[0] == FLAG){
-		printf("Received flag\n");
-		if(s == bcc) s = stop;
-		else s = flag; 
-	}
-	else if(s == flag && buf[0] == A){
-		printf("Received A\n");
-		if(s == flag) s = a;
-		else s = start;
-	}
-	else if(s == a && buf[0] == C_SET){
-		printf("Received C\n");
-		if(s == a) s = c;
-		else s = start;
-	}
-	else if(buf[0] == (A^C_SET)){
-		printf("Received A^C\n");
-		if( s == c) s = bcc;
-		else s = start;
-	}
-	else{
-		printf("Received something else \n");
+		printf("Waiting for message...\n");
+		res = read(fd,buf,1);
+		printf("Byte read: %x\n", buf[0]);
+		if(buf[0] == FLAG){
+			printf("Received flag\n ");
+			if(s == bcc) s = stop;
+			else s = flag; 
+		}
+		else if(s == flag && buf[0] == A){
+			printf("Received A\n");
+			if(s == flag) s = a;
+			else s = start;
+		}
+		else if(s == a && buf[0] == C_SET){
+			printf("Received C\n");
+			if(s == a) s = c;
+			else s = start;
+		}
+		else if(buf[0] == (A^C_SET)){
+			printf("Received A^C\n");
+			if( s == c) s = bcc;
+			else s = start;
+		}
+		else{
+			printf("Received something else \n");
 	};
 
 	if (s == flag) n = 0;
