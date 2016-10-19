@@ -29,7 +29,7 @@ int sendMessage(int fd, char* message) {
 	return write(fd, message, CONTROLPACKAGESIZE * sizeof(char));
 }
 
-int recieveMessage(int fd, char* message) { //Esta função só dá erro se não conseguir ler 1 byte(mudar)
+int receiveMessage(int fd, char* message) { //Esta função só dá erro se não conseguir ler 1 byte(mudar)
 	char buf;
 
 	while (STOP==FALSE) {       /* loop for input */
@@ -108,7 +108,7 @@ int llopen(int fd, int connectionMode) {
 			char* receivedMessage = malloc(CONTROLPACKAGESIZE * sizeof(char));
 			alarm(1);
 			
-			if(recieveMessage(fd, receivedMessage) != -1) {
+			if(receiveMessage(fd, receivedMessage) != -1) {
 				if(receivedMessage[1] == A_TR && receivedMessage[2] == C_UA) {
 					alarm(0);
 					printf("Connection established.\n");
@@ -119,7 +119,7 @@ int llopen(int fd, int connectionMode) {
 	} else {
 		while(!isConnected) {
 			char* setPackage = malloc(CONTROLPACKAGESIZE * sizeof(char));
-			recieveMessage(fd, setPackage);
+			receiveMessage(fd, setPackage);
 
 			if(setPackage[1] == A_TR && setPackage[2] == C_SET) {
 				char* uaPackage = malloc(CONTROLPACKAGESIZE * sizeof(char));
