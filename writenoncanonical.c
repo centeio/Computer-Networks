@@ -30,17 +30,10 @@ volatile int STOP=FALSE;
 int f, fd, res;
 char buf[5];
 
-void sendMessage() {
-	
-	buf[0] = FLAG;
-	buf[1] = A;
-	buf[2] = C_SET;
-	buf[3] = (buf[1]^buf[2]);
-	buf[4] = FLAG;
-
+void sendMessage(int fd, char* message) {
 
     printf("Sending 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n", buf[0], buf[1], buf[2], buf[3], buf[4]);
-    res = write(fd,buf,5);   
+    res = write(fd,message,CONTROLPACKAGESIZE * sizeof(char));   
     printf("%d bytes written\n", res);
 	f = 1;
 }
