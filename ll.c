@@ -78,26 +78,26 @@ int llclose(int fd, int mode){
 
 	else if(RECEIVER == mode){
 		while(0 == disc){
-				char* discPackage = malloc(CONTROLPACKAGESIZE * sizeof(char));				
+			char* discPackage = malloc(CONTROLPACKAGESIZE * sizeof(char));				
 
-				receiveMessage(fd, discPackage);
-				if(discPackage[1] == A_TR && discPackage[2] == C_DISC);
-				while(counter < TRIESMAX){
-					char* response = malloc(CONTROLPACKAGESIZE * sizeof(char));				
+			receiveMessage(fd, discPackage);
+			if(discPackage[1] == A_TR && discPackage[2] == C_DISC);
+			while(counter < TRIESMAX){
+				char* response = malloc(CONTROLPACKAGESIZE * sizeof(char));				
 
-					response[0] = FLAG;
-					response[1] = A_TR;
-					response[2] = C_DISC;
-					response[3] = (buf[1]^buf[2]);
-					response[4] = FLAG;
+				response[0] = FLAG;
+				response[1] = A_TR;
+				response[2] = C_DISC;
+				response[3] = (buf[1]^buf[2]);
+				response[4] = FLAG;
 
-					sendMessage(fd, response);
-					free(response);
+				sendMessage(fd, response);
+				free(response);
 
-					counter++;
+				counter++;
 
-				}
-				free(discPackage);
+			}
+			free(discPackage);
 
 			char* UA = malloc(CONTROLPACKAGESIZE * sizeof(char));
 
@@ -111,10 +111,6 @@ int llclose(int fd, int mode){
 				printf("UA received: disconected.\n");
 			}
 		}			
-
 	}
-
-
 	return 1;
-
 }

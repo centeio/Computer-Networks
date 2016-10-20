@@ -18,7 +18,7 @@
 #define C_UA 0x07
 #define RECEIVER 0
 #define TRANSMITTER 1
-#define CONTROLPACKAGESIZE 5
+#define SUPERVISIONPACKAGE 5
 
 struct linkLayer {
     char port[20];
