@@ -6,5 +6,4 @@ struct applicationLayer {
     char* fileName;
 }
 
-
 int open(char* port, int status, int baudRate, unsigned int messageSize, int retries, int timeout, char* fileName);
