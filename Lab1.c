@@ -15,6 +15,7 @@ int main(int argc, char** argv)
     char* fileName = argv[6];
     int status = atoi(argv[7]);
 
+    //Application Layer function
     open(port, baudRate, messageSize, retries, timeout, fileName, status);
 
     return 0;
