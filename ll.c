@@ -47,7 +47,10 @@ int llclose(int fd, int mode){
 				discPackage[3] = (buf[1]^buf[2]);
 				discPackage[4] = FLAG;
 
-				sendMessage(fd, discPackage);
+				if(sendMessage(fd, discPackage) < 0){
+					"Message failed sending \n";
+					return -1;
+				}
 				free(discPackage);
 
 				counter++;
@@ -56,7 +59,10 @@ int llclose(int fd, int mode){
 
 			char* response = malloc(CONTROLPACKAGESIZE * sizeof(char));
 
-			receiveMessage(fd, response);
+			if(receiveMessage(fd, response) < 0){
+				"Message failed receiving \n";
+				return -1;				
+			}
 			if(response[1] == A_TR && response[2] == C_DISC){
 				disconnected = 1;
 		
@@ -68,7 +74,11 @@ int llclose(int fd, int mode){
 				UA[3] = (buf[1]^buf[2]);
 				UA[4] = FLAG;
 
-				sendMessage(fd, UA);
+				if(sendMessage(fd, UA) < 0){
+					"Message failed sending \n";
+					return -1;					
+				}
+					
 				free(UA);
 
 				printf("UA sent: disconected.\n");
@@ -80,7 +90,11 @@ int llclose(int fd, int mode){
 		while(0 == disc){
 			char* discPackage = malloc(CONTROLPACKAGESIZE * sizeof(char));				
 
-			receiveMessage(fd, discPackage);
+			if(receiveMessage(fd, discPackage) < 0){
+				"Message failed receiving \n";
+				return -1;				
+			}
+				
 			if(discPackage[1] == A_TR && discPackage[2] == C_DISC);
 			while(counter < TRIESMAX){
 				char* response = malloc(CONTROLPACKAGESIZE * sizeof(char));				
@@ -91,7 +105,10 @@ int llclose(int fd, int mode){
 				response[3] = (buf[1]^buf[2]);
 				response[4] = FLAG;
 
-				sendMessage(fd, response);
+				sendMessage(fd, response){
+					"Message failed sending \n";
+					return -1;					
+				}
 				free(response);
 
 				counter++;
@@ -101,7 +118,10 @@ int llclose(int fd, int mode){
 
 			char* UA = malloc(CONTROLPACKAGESIZE * sizeof(char));
 
-			receiveMessage(fd, UA);
+			if(receiveMessage(fd, UA) < 0){
+				"Message failed sending \n";
+				return -1;				
+			}
 
 			if(UA[1] == A_TR && UA[2] == C_UA){
 				disconnected = 1;
@@ -112,5 +132,77 @@ int llclose(int fd, int mode){
 			}
 		}			
 	}
+	
 	return 1;
+}
+
+
+int receive(){
+	if(llopen(application->fd, application->mode) <= 0){
+		printf("could not open file\n");
+		return -1;
+	}
+		FILE* file; 
+		char fileName[30] = "";
+		char fileSize[10] = "";
+ 		char package[3000];
+		
+	   	memset(package, 0, 3000);
+	
+		int received = 0;
+		while(0 == received){
+			char* receiving = malloc(sizeof(char));
+			int dataSize = llread(application->fd, package);
+				if(dataSize > 0){
+					if(3 == package[0])
+						done = 1;
+					int i = 1;
+					while(i < size){
+						int j = 0;
+						if(0 == package[i]){
+							printf("File length\n");
+							for(; j < package[i+1]; j++){ // i+1 = V length
+								fileSize[j] = package[j+i+2];
+							}
+						}
+						else if(1 == package[i]){
+							printf("File name\n");
+							for(; j < package[i+1]; j++){ 
+								fileName[j] = package[i+j+2];
+							}
+						}
+						
+						i+= j + 2;					
+					}
+				}
+			if(fopen(fileName,"wb") < 0){
+				printf("Error opening new file");
+				return -1;
+			}
+			
+		
+			if(1 == package[0] && file != NULL){ //data
+
+				printf("Data package: %d \n", package[1]);
+				int psize = (unsigned char)package[2] << 8 | (unsigned char)package[3]; //(K = 256*L2+L1)
+				fwrite(&package[4], sizeof(char), psize, file);
+			}
+				
+			memset(package, 0, 3000);
+		
+		}
+	if (fclose(file) < 0){
+		printf("File %s was not closed.\n", fileName);
+		return -1;
+	}	
+	if (llclose(application->fd, application->mode) < 0) {
+		printf("File transfered successfully. \n");
+		return 1;
+	}
+
+	printf("Serial port was not closed!\n");
+
+	return -1;
+	
+	
 }
