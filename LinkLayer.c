@@ -21,25 +21,25 @@ int receiveMessage(int fd, char* message) { //Esta função só dá erro se não
 
 			printf("Byte read: %x\n", buf);
 			if(buf == FLAG){
-				printf("Received flag\n");
+				//printf("Received flag\n");
 				if(s == bcc) s = stop;
 				else s = flag; 
 			}
 			else if(s == flag && buf == A){
-				printf("Received A\n");
+				//printf("Received A\n");
 				s = a;
 			}
 			else if(s == a && buf == C_UA){
-				printf("Received C\n");
+				//printf("Received C\n");
 				s = c;
 			}
 			else if(s == c && buf == (A^C_UA)){
-				printf("Received A^C\n");
+				//printf("Received A^C\n");
 				s = bcc;
 			}
 			else{
 				s = start;
-				printf("Received something else \n");
+				//printf("Received something else \n");
 			}
 
 			if (s == flag) n = 0;
