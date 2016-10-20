@@ -1,12 +1,12 @@
 #include "ApplicationLayer.h"
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
+
     if(argc != 8) {
         printf("Number of Arguments Wrong: string port, int baudRate, int messageSize, int retries, int timeout, string fileName, int status\n");
         return -1;
     }
-
+	
     char* port = argv[1];
     int baudRate = atoi(argv[2]);
     int messageSize = atoi(argv[3]);
@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     int status = atoi(argv[7]);
 
     //Application Layer function
-    open(port, baudRate, messageSize, retries, timeout, fileName, status);
+    startApplicationLayer(port, baudRate, messageSize, retries, timeout, fileName, status);
 
     return 0;
 }

@@ -12,6 +12,7 @@
 #define FALSE 0
 #define TRUE 1
 #define FLAG 0x7e
+#define ESCAPE 0x7d
 #define A_TR 0x03
 #define A_RT 0x01
 #define C_SET 0x03
@@ -25,12 +26,16 @@ struct linkLayer {
     int baudRate;
     unsigned int sequenceNumber;
     unsigned int timeout;
-    unsigned int numTransmissions;
-
-    char frame[CONTROLPACKAGESIZE]; //MAX_SIZE not defined
+    unsigned int triesMAX;
+    char frame[MAX_SIZE]; //Not defined
 }
+
+unsigned int timeExceeded;
 
 void handleAlarm();
 int sendMessage(int fd, char* message);
 int receiveMessage(int fd, char* message);
 int llopen(int fd, int connectionMode);
+int llclose(int fd, int mode);
+unsigned int dataStuffing(char* buffer, unsigned int frameSize);
+unsigned int dataDestuffing(char* buffer, unsigned int frameSize);
