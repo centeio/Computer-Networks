@@ -2,6 +2,7 @@
 
 void handleAlarm() {
 	timeExceeded = 1;
+	printf("Alarm called.\n");
  }
 
 int sendMessage(int fd, char* message) {
@@ -19,8 +20,8 @@ int receiveMessage(int fd, char* message) {
 	int n = -1;
 	enum STATE s = start;
 
-	while (FALSE == STOP && timeExceeded == 0) {       /* loop for input */
-	
+	while (FALSE == STOP && !timeExceeded) {       /* loop for input */
+
 		printf("Waiting for message...\n");
 		
 		//Reads one byte
@@ -62,13 +63,13 @@ int receiveMessage(int fd, char* message) {
 			printf("Unable to read message.\n");
 			return -1;
 		}
+	printf("Received 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n", message[0], message[1], message[2], message[3], message[4]);	
 	}
 	
-	printf("Received 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n", message[0], message[1], message[2], message[3], message[4]);
 	return 0;
 }
 
-int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int triesMAX) {
+int initializeLinkLayer(int fd, char * port, int triesMAX, int timeout) {
 	
 	//Allocates memory for the linkLayer structure
 	link = (struct linkLayer*)malloc(sizeof(struct linkLayer));
@@ -96,8 +97,8 @@ int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int trie
     /* Set input mode (non-canonical, no echo,...) */
     newtio.c_lflag = 0;
 
-    newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
-    newtio.c_cc[VMIN]     = 1;   /* blocking read until 5 chars received */
+    newtio.c_cc[VTIME]    = 10;   /* inter-character timer unused */
+    newtio.c_cc[VMIN]     = 0;   /* blocking read until 5 chars received */
 
   	/* 
     	VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
@@ -106,7 +107,7 @@ int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int trie
 
     tcflush(fd, TCIOFLUSH);
 
-    if (tcsetattr(fd,TCSANOW,&newtio) == -1) {
+    if (tcsetattr(fd, TCSANOW, &newtio) == -1) {
       perror("tcsetattr");
       return -1;
     }
@@ -124,6 +125,7 @@ int llopen(int fd, int status) {
 			
 			//Only retries to send the frame if the time was Exceeded
 			if(counter == 0 || timeExceeded) {
+				timeExceeded = 0;
 				
 				//If the number of tries was exceeded
 				if(counter >= link->triesMAX) {
@@ -152,7 +154,6 @@ int llopen(int fd, int status) {
 		
 			//If a message was read
 			if(receiveMessage(fd, receivedMessage) != -1) {
-			
 				//If the message is UA, the connection between the two computers is online
 				if(receivedMessage[1] == A_TR && receivedMessage[2] == C_UA) {
 					alarm(0);
@@ -541,6 +542,8 @@ int llclose(int fd, int mode){
 		}
 		free(discPackage);			
 	}
+
+	free(link);
 
 	return 0;
 }

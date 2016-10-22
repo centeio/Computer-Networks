@@ -62,17 +62,17 @@ int initializeApplicationLayer(char* port, unsigned int messageSize, int retries
     application->fileName = fileName;
 
 	//Initializes link layer
-    if(initializeLinkLayer(application->fd, port, messageSize, retries, timeout) < 0) {
+    if(initializeLinkLayer(application->fd, port, retries, timeout) < 0) {
         printf("Unable to initialize link layer.\n");
         return -1;
     }
 	
 	//Checks if the computter is in transmitter mode
     if(application->status == TRANSMITTER)
-        write();
+        send();
     //Checks if the computer is in receiver mode
     else if(application->status == RECEIVER)
-        read();
+        receive();
     //Else nothing happens, simply closes the port
 	
 	//Restores the termios
@@ -83,14 +83,17 @@ int initializeApplicationLayer(char* port, unsigned int messageSize, int retries
 
 	//Closes the port
     close(application->fd);
+
+	free(application);
     return 0;
 }
 
-int write(){
+int send(){
 
+	printf("Start writing\n");
 	//Opens the file as a binary file for reading
 	FILE* file = fopen(application->fileName, "rb");
-	if(!file){
+	if(!file) {
 		//Debug: Error message when unable to open file.
 		printf("Unable to open the specified file.\n");
 		return -1;
@@ -162,6 +165,8 @@ int write(){
 		//Updates the package sequence number
 		packageSequenceNumber++;
 	}
+
+	free(data);
 	
 	//Closes the file
 	if (fclose(file) != 0) {
@@ -187,7 +192,7 @@ int write(){
 	return 0;
 }
 
-int read(){
+int receive(){
 
 	//Tries to establish connection by reading the C_UA response
 	if(llopen(application->fd, application->status) <= 0)

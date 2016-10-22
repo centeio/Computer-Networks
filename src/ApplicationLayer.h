@@ -11,5 +11,5 @@ struct applicationLayer* application;
 
 int writeControlPackage(int control, char* fileName, char * fileSize);
 int initializeApplicationLayer(char* port, unsigned int messageSize, int retries, int timeout, char* fileName, int status);
-int write();
-int read();
+int send();
+int receive();

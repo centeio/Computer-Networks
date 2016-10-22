@@ -47,7 +47,7 @@ unsigned int timeExceeded;
 void handleAlarm();
 int sendMessage(int fd, char* message);
 int receiveMessage(int fd, char* message);
-int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int triesMAX);
+int initializeLinkLayer(int fd, char * port, int triesMAX, int timeout);
 int llopen(int fd, int connectionMode);
 int llwrite(int fd, char* buffer, unsigned int length);
 int llread(int fd, char* buffer);
