@@ -38,7 +38,7 @@ int writeControlPackage(int control, char* fileName, char * fileSize) {
     return llwrite(appLayer->fd, controlPackage, size);
 }
 
-int startApplicationLayer(char* port, int baudRate, unsigned int messageSize, int retries, int timeout, char* fileName, int status) {
+int initializeApplicationLayer(char* port, int baudRate, unsigned int messageSize, int retries, int timeout, char* fileName, int status) {
     
     //Allocates memory for application struct
     application = (struct applicationLayer*) malloc(sizeof(struct applicationLayer));
@@ -74,6 +74,12 @@ int startApplicationLayer(char* port, int baudRate, unsigned int messageSize, in
     else if(application->status == RECEIVER)
         read();
     //Else nothing happens, simply closes the port
+	
+	//Restores the termios
+	if (tcsetattr(fd, TCSANOW, &oldtio) == -1) {
+      perror("tcsetattr");
+      return -1;
+    }
 
 	//Closes the port
     close(application->fd);

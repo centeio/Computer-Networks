@@ -5,8 +5,10 @@ struct applicationLayer {
     int status; //Connection mode, 0 - Receiver, 1 - Transmitter
     unsigned int messageSize;
     char* fileName;
-};
+}
+
+struct applicationLayer* application;
 
 int writeControlPackage(int control, char* fileName, char * fileSize);
-int startApplicationLayer(char* port, int status, int baudRate, unsigned int messageSize, int retries, int timeout, char* fileName);
+int initializeApplicationLayer(char* port, int status, int baudRate, unsigned int messageSize, int retries, int timeout, char* fileName);
 int write();

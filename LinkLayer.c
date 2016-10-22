@@ -1,8 +1,8 @@
 #include "LinkLayer.h"
 
 void handleAlarm() {
-	timeExceeded = 1; //change variable name
-}
+	timeExceeded = 1;
+ }
 
 int sendMessage(int fd, char* message) {
 	//Debug: Prints message to send
@@ -14,8 +14,10 @@ int sendMessage(int fd, char* message) {
 
 int receiveMessage(int fd, char* message) { //Esta função só dá erro se não conseguir ler 1 byte(mudar)
 	char buf;
+	int res;
+	int STOP = FALSE;
 
-	while (FALSE==STOP && timeExceeded == 0) {       /* loop for input */
+	while (FALSE == STOP && timeExceeded == 0) {       /* loop for input */
 	
 		printf("Waiting for message...\n");
 		
@@ -40,7 +42,7 @@ int receiveMessage(int fd, char* message) { //Esta função só dá erro se não
 			}
 			else{
 				s = start;
-				printf("Received something else \n");
+				printf("Received something else.\n");
 			}
 
 			if (s == flag) n = 0;
@@ -64,24 +66,51 @@ int receiveMessage(int fd, char* message) { //Esta função só dá erro se não
 	return 0;
 }
 
-int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int triesMAX){
+int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int triesMAX) {
 	
 	//Allocates memory for the linkLayer structure
-	linkLayer = (struct linkLayer*)malloc(sizeof(struct linkLayer));
+	link = (struct linkLayer*)malloc(sizeof(struct linkLayer));
 	
 	//Initializes link layer structure
 	strcpy(linkLayer->port, port);
-	linkLayer->baudRate = baudrate;
-	linkLayer->timeout = timeout;
-	linkLayer->triesMAX = triesMAX;
-	linkLayer->sequenceNumber = 0;
+	link->baudRate = baudrate;
+	link->timeout = timeout;
+	link->triesMAX = triesMAX;
+	link->sequenceNumber = 0;
     
     //Set up alarm routine
 	(void) signal(SIGALRM, handleAlarm);
 	
-	if(termiosSettings(fd) < 0){ //Implementar
-		return -1;
-	}
+	//Changes the termios settings
+	if (tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
+      perror("tcgetattr");
+      return -1;
+    }
+
+    bzero(&newtio, sizeof(newtio));
+    newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
+    newtio.c_iflag = IGNPAR;
+    newtio.c_oflag = 0;
+
+    /* Set input mode (non-canonical, no echo,...) */
+    newtio.c_lflag = 0;
+
+    newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
+    newtio.c_cc[VMIN]     = 1;   /* blocking read until 5 chars received */
+
+  	/* 
+    	VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
+    	leitura do(s) próximo(s) caracter(es)
+  	*/
+
+    tcflush(fd, TCIOFLUSH);
+
+    if (tcsetattr(fd,TCSANOW,&newtio) == -1) {
+      perror("tcsetattr");
+      return -1;
+    }
+
+    printf("New termios structure set\n");
 	return 0;
 }
 
@@ -91,6 +120,8 @@ int llopen(int fd, int status) {
 
 	if(TRANSMITTER == status) {
 		while(!isConnected) {
+
+			//If the number of tries was exceeded
 			if(numTries > TRIESMAX) {
 				printf("Unable to establising connection.\n");			
 				return -1;
@@ -112,7 +143,7 @@ int llopen(int fd, int status) {
 			
 			//Allocates memory to receive the message
 			char* receivedMessage = malloc(SUPERVISIONPACKAGE * sizeof(char));
-			alarm(1); //linklayer->timeout;
+			alarm(linkLayer->timeout); 
 			
 			//If a message was read
 			if(receiveMessage(fd, receivedMessage) != -1) {
@@ -121,7 +152,7 @@ int llopen(int fd, int status) {
 				if(receivedMessage[1] == A_TR && receivedMessage[2] == C_UA) {
 					alarm(0);
 					printf("Connection established.\n");
-					isConnected = 1;
+					isConnected = TRUE;
 				}		
 			}	
 		}
@@ -150,12 +181,212 @@ int llopen(int fd, int status) {
 				sendMessage(fd, uaPackage);
 				free(uaPackage);
 				
-				connected = 1;
+				isconnected = TRUE;
 				printf("Connection established.\n");
       		}
 		}
 	}
 	return fd; 
+}
+
+int llwrite(int fd, char* buffer, unsigned int length) {
+
+	//6 for the F, A, C, BCC1, BCC2 and F
+	char* frame = (char*)malloc(length + 6 * sizeof(char));
+	
+	//Creates the BBC2 flag depeding on the data
+	char BCC2 = findBCC2(buffer, length);
+	
+	//Builds the frame to send
+	frame[0] = FLAG;
+	frame[1] = A_TR;
+	frame[2] = (linkLayer->sequenceNumber << 6);
+	frame[3] = frame[1]^frame[2];
+	memcpy(&frame[4], buffer, length);
+	frame[4 + length] = BCC2;
+	frame[5 + length] = FLAG;
+
+	//Data stuffing
+	int newSize = dataStuffing(frame, length + 6 * sizeof(char));
+
+	int STOP = FALSE;
+	int tries = 0;
+
+	while(!STOP){
+		
+		if(tries == 0 || timeExceeded){
+
+			//If the number of tries was exceeded
+			if (tries >= linkLayer->triesMAX) {
+				printf("Unable to send data package.\n");
+				return -1;
+			}
+			
+			//Sends Information frame
+			if(write(fd, frame, newSize) == -1){
+				printf("Unable to write data package\n");
+				return -1;
+			}
+			tries++;
+			alarm(link->timeout);
+		}
+
+		char response[SUPERVISIONPACKAGE];
+
+		recieveMessage(fd, response);
+		
+		if(response[0] == FLAG || response[1] == A_TR) {
+			
+			//If the Information frame was rejected
+			if((response[2] & 0x0F) == C_REJ) {
+
+				//If the sequence number is the same as the one sent, retry to send the Information frame
+				if((response[2] >> 6) == linkLayer->sequenceNumber) {
+				  alarm(0);
+				  tries = 0;
+				}
+
+				//If the sequence number is not the same, the response was not correctly built
+				else {
+				  printf("REJ response was not correctly built.\n");
+				  return -1;
+				}
+			}
+
+			else if ((response[2] & 0x0F) == C_RR) {
+				
+				//If the sequence number is not the same as the one sent, the frame was accepted 
+				if((response[2] >> 6) != linkLayer->sequenceNumber) {
+					alarm(0);
+					linkLayer->sequenceNumber = (response[2] >> 6);
+					STOP = TRUE;
+				}
+
+				//The header of the package was accepted, but the data field needs to be resent
+				else {
+
+					//Sets timeExceeded to 1 to be able to resend the Information frame
+					handleAlarm();
+				}
+			}
+		}
+	}
+	
+	//Reset timeExceeded flag
+	timeExceeded = 0;
+
+	return newSize;
+}
+
+int llread(int fd, char* buffer){
+	int STOP = FALSE;
+
+	//0 - Before receiving the first FLAG flag | 1 - After receiving the first FLAG flag and before receiving the last FLAG flag || 2 - After receiving the last
+	// FLAG flag
+	int state = 0;
+	int size = 0;
+
+	char* buffer = (char*)malloc(3000);
+
+	while(!STOP){
+
+		char c;
+		if(state < 2) {
+			int res = read(fd, &c, 1);
+			if(res == -1){
+				printf("Unable to read Information package.\n");
+				return -1;
+			}
+		}
+
+		switch(state){
+			case 0:
+				if(c == FLAG) {
+					buffer[size] = c;
+					size++;
+					state = 1;
+				}
+				break;
+			case 1:
+				if(c == FLAG && size != 1) {
+					buffer[size] = c;
+					size++;
+					state = 2;
+				}
+
+				else if(c == FLAG && size == 1){;}
+
+				else {
+					buffer[size] = c;
+					size++;
+				}
+				break;
+			default:
+				STOP = TRUE;
+				break;
+		}
+	}
+
+	int process = FALSE;
+	int newSize = dataDestuffing(buffer, size);
+
+	if(buffer[0] != FLAG || buffer[1] != A_TR || buffer[3] != (buffer[1] ^ buffer[2])){
+		printf("Received frame header was not corretly built\n");
+		free(buffer); 
+		return -1;
+	}
+
+	//6 - F, A, C, BCC1, BCC2 and F
+	int dataPackageSize = newSize - 6 * sizeof(char);
+
+	//Creates BCC2 depending on the data field
+	char BCC2 = findBCC2(&buffer[4], dataPackageSize);
+	
+	//Only the last bit is considered
+	unsigned int sequenceNumber = (buffer[2] >> 6) & 1;
+
+	char response[SUPERVISIONPACKAGE * sizeof(char)];
+	response[0] = FLAG;
+	response[1] = A_TR;
+	response[4] = FLAG;
+
+	//If the right frame was received (With the expected sequence number)
+	if(linkLayer->sequenceNumber == sequenceNumber){
+
+		//If the data BBC does not match, the frame was corrupted
+		if(BCC2 != buffer[newSize - 2]) {
+			printf("Data BCC does not match the data BCC received.\nFrame rejected.\n");
+			response[2] = (linkLayer->sequenceNumber << 7) | C_REJ;
+		}
+		else{
+			//Updates the sequenceNumber to the next one
+			if(linkLayer->sequenceNumber == 0) {
+				linkLayer->sequenceNumber = 1;
+			}
+		  	else {
+		  		linkLayer->sequenceNumber = 0;
+		  	}
+		  	process = TRUE;
+			
+			//Sends RR as a response			  	
+			response[2] = (linkLayer->sequenceNumber << 7) | C_RR;
+	  }
+	}
+	else{
+		//
+		response[2] = (linkLayer->sequenceNumber << 7) | C_RR;
+	}
+
+	response[3] = response[1] ^ response[2];
+	sendMessage(fd, response);
+	
+	if(process) {
+		memcpy(buffer, &buffer[4], dataSize);
+		free(buf);
+		return dataSize;
+	}
+	free(buf);
+	return -1;
 }
 
 int llclose(int fd, int mode){
@@ -275,7 +506,7 @@ unsigned int dataStuffing(char* buffer, unsigned int frameSize) {
 		if (buffer[i] == FLAG || buffer[i] == ESCAPE)
 			newframeSize++;
 	
-	//Reallocates memory to the buff, adding more space in the end		
+	//Reallocates memory for the buffer, adding more space in the end		
 	buffer = (char*) realloc(buf, newframeSize);
 	
 	for (i = 1; i < frameSize - 1; i++) {
@@ -321,5 +552,17 @@ unsigned int dataDestuffing(char* buffer, unsigned int frameSize){
 	//Returns the size of the original frame
 	return frameSize;
 	
+}
+
+char findBCC2(char* data, unsigned int size) {
+	int i;
+	char BCC2 = 0;
+	
+	//Iterates through the data buffer and apply the exclusive or to all the elements
+	for(i = 0; i < size; i++){
+		BCC2 ^= data[i];
+	}
+
+	return BCC2;
 }
 

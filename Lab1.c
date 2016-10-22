@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     int status = atoi(argv[7]);
 
     //Application Layer function
-    startApplicationLayer(port, baudRate, messageSize, retries, timeout, fileName, status);
+    initializeApplicationLayer(port, baudRate, messageSize, retries, timeout, fileName, status);
 
     return 0;
 }
