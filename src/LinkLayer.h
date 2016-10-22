@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <signal.h>
 
-#define TRIESMAX 5
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -19,18 +18,17 @@
 #define C_UA 0x07
 #define C_REJ 0x01
 #define C_RR 0x05
+#define C_DISC 0x0B
 #define RECEIVER 0
 #define TRANSMITTER 1
 #define SUPERVISIONPACKAGE 5
 
 struct linkLayer {
     char port[20];
-    int baudRate;
     unsigned int sequenceNumber;
     unsigned int timeout;
     unsigned int triesMAX;
-    char frame[MAX_SIZE]; //Not defined
-}
+};
 
 enum STATE{
 	start,
@@ -52,6 +50,7 @@ int receiveMessage(int fd, char* message);
 int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int triesMAX);
 int llopen(int fd, int connectionMode);
 int llwrite(int fd, char* buffer, unsigned int length);
+int llread(int fd, char* buffer);
 int llclose(int fd, int mode);
 unsigned int dataStuffing(char* buffer, unsigned int frameSize);
 unsigned int dataDestuffing(char* buffer, unsigned int frameSize);

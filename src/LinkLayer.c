@@ -12,10 +12,12 @@ int sendMessage(int fd, char* message) {
 	return write(fd, message, SUPERVISIONPACKAGE * sizeof(char));
 }
 
-int receiveMessage(int fd, char* message) { //Esta função só dá erro se não conseguir ler 1 byte(mudar)
+int receiveMessage(int fd, char* message) {
 	char buf;
 	int res;
 	int STOP = FALSE;
+	int n = -1;
+	enum STATE s = start;
 
 	while (FALSE == STOP && timeExceeded == 0) {       /* loop for input */
 	
@@ -27,17 +29,17 @@ int receiveMessage(int fd, char* message) { //Esta função só dá erro se não
 		//State Machine
 		if(1 == res) {
 			
-			if(buf == FLAG){
+			if(buf == FLAG) {
 				if(s == bcc) s = stop;
 				else s = flag; 
 			}
-			else if(s == flag && buf == A){
+			else if(s == flag && (buf == A_TR || buf == A_RT)) {
 				s = a;
 			}
-			else if(s == a && buf == C_UA){
+			else if(s == a && (buf == C_SET || buf == C_UA || (buf & 0x0F) == C_RR || (buf & 0x0F) == C_REJ || c == C_DISC)) {
 				s = c;
 			}
-			else if(s == c && buf == (A^C_UA)){
+			else if(s == c && buf == (message[1]^message[2])) {
 				s = bcc;
 			}
 			else{
@@ -72,8 +74,7 @@ int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int trie
 	link = (struct linkLayer*)malloc(sizeof(struct linkLayer));
 	
 	//Initializes link layer structure
-	strcpy(linkLayer->port, port);
-	link->baudRate = baudrate;
+	strcpy(link->port, port);
 	link->timeout = timeout;
 	link->triesMAX = triesMAX;
 	link->sequenceNumber = 0;
@@ -82,7 +83,7 @@ int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int trie
 	(void) signal(SIGALRM, handleAlarm);
 	
 	//Changes the termios settings
-	if (tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
+	if (tcgetattr(fd, &oldtio) == -1) { /* save current port settings */
       perror("tcgetattr");
       return -1;
     }
@@ -116,51 +117,57 @@ int initializeLinkLayer(int fd, char * port, int baudrate, int timeout, int trie
 
 
 int llopen(int fd, int status) {
-	int numTries = 0, isConnected = FALSE;
+	int counter = 0, isConnected = FALSE;
 
 	if(TRANSMITTER == status) {
 		while(!isConnected) {
-
-			//If the number of tries was exceeded
-			if(numTries > TRIESMAX) {
-				printf("Unable to establising connection.\n");			
-				return -1;
+			
+			//Only retries to send the frame if the time was Exceeded
+			if(counter == 0 || timeExceeded) {
+				
+				//If the number of tries was exceeded
+				if(counter >= link->triesMAX) {
+					printf("Unable to establising connection.\n");			
+					return -1;
+				}
+			
+				//Builds the set frame
+				char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+				setPackage[0] = FLAG;
+				setPackage[1] = A_TR;
+				setPackage[2] = C_SET;
+				setPackage[3] = setPackage[1] ^ setPackage[2];
+				setPackage[5] = FLAG;
+			
+				//Sends the set frame
+				sendMessage(fd, setPackage);
+				free(setPackage);
+		
+				counter++;
 			}
 			
-			//Builds the set frame
-			char setPackage = malloc(SUPERVISIONPACKAGE * sizeof(char));
-			setPackage[0] = FLAG;
-			setPackage[1] = A_TR;
-			setPackage[2] = C_SET;
-			setPackage[3] = setPackage[1] ^ setPackage[2];
-			setPackage[5] = FLAG;
-			
-			//Sends the set frame
-			sendMessage(fd, setPackage);
-			free(setPackage);
-		
-			numTries++;
-			
 			//Allocates memory to receive the message
-			char* receivedMessage = malloc(SUPERVISIONPACKAGE * sizeof(char));
-			alarm(linkLayer->timeout); 
-			
+			char* receivedMessage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+			alarm(link->timeout);
+		
 			//If a message was read
 			if(receiveMessage(fd, receivedMessage) != -1) {
-				
+			
 				//If the message is UA, the connection between the two computers is online
 				if(receivedMessage[1] == A_TR && receivedMessage[2] == C_UA) {
 					alarm(0);
 					printf("Connection established.\n");
 					isConnected = TRUE;
 				}		
-			}	
+			}
+			free(receivedMessage);
 		}
+		timeExceeded = 0;
 	} else {
 		while(!isConnected) {
 			
 			//Allocates memory to receive the set frame
-			char* setPackage = malloc(SUPERVISIONPACKAGE * sizeof(char));
+			char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 			
 			//Reads the message from the port
 			receiveMessage(fd, setPackage);
@@ -169,7 +176,7 @@ int llopen(int fd, int status) {
 			if(setPackage[1] == A_TR && setPackage[2] == C_SET) {
 
 				//Builds the frame UA to send
-				char* uaPackage = malloc(SUPERVISIONPACKAGE * sizeof(char));
+				char* uaPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 
 				uaPackage[0] = FLAG;
 				uaPackage[1] = A_TR;
@@ -181,9 +188,10 @@ int llopen(int fd, int status) {
 				sendMessage(fd, uaPackage);
 				free(uaPackage);
 				
-				isconnected = TRUE;
+				isConnected = TRUE;
 				printf("Connection established.\n");
       		}
+			free(setPackage);
 		}
 	}
 	return fd; 
@@ -200,7 +208,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 	//Builds the frame to send
 	frame[0] = FLAG;
 	frame[1] = A_TR;
-	frame[2] = (linkLayer->sequenceNumber << 6);
+	frame[2] = (link->sequenceNumber << 6);
 	frame[3] = frame[1]^frame[2];
 	memcpy(&frame[4], buffer, length);
 	frame[4 + length] = BCC2;
@@ -210,14 +218,15 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 	int newSize = dataStuffing(frame, length + 6 * sizeof(char));
 
 	int STOP = FALSE;
-	int tries = 0;
+	int counter = 0;
 
 	while(!STOP){
 		
-		if(tries == 0 || timeExceeded){
+		//It only retries to send the code if the time was exceeded
+		if(counter == 0 || timeExceeded){
 
 			//If the number of tries was exceeded
-			if (tries >= linkLayer->triesMAX) {
+			if (counter >= link->triesMAX) {
 				printf("Unable to send data package.\n");
 				return -1;
 			}
@@ -227,13 +236,13 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 				printf("Unable to write data package\n");
 				return -1;
 			}
-			tries++;
+			counter++;
 			alarm(link->timeout);
 		}
 
 		char response[SUPERVISIONPACKAGE];
 
-		recieveMessage(fd, response);
+		receiveMessage(fd, response);
 		
 		if(response[0] == FLAG || response[1] == A_TR) {
 			
@@ -241,9 +250,9 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 			if((response[2] & 0x0F) == C_REJ) {
 
 				//If the sequence number is the same as the one sent, retry to send the Information frame
-				if((response[2] >> 6) == linkLayer->sequenceNumber) {
+				if((response[2] >> 6) == link->sequenceNumber) {
 				  alarm(0);
-				  tries = 0;
+				  counter = 0;
 				}
 
 				//If the sequence number is not the same, the response was not correctly built
@@ -256,9 +265,9 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 			else if ((response[2] & 0x0F) == C_RR) {
 				
 				//If the sequence number is not the same as the one sent, the frame was accepted 
-				if((response[2] >> 6) != linkLayer->sequenceNumber) {
+				if((response[2] >> 6) != link->sequenceNumber) {
 					alarm(0);
-					linkLayer->sequenceNumber = (response[2] >> 6);
+					link->sequenceNumber = (response[2] >> 6);
 					STOP = TRUE;
 				}
 
@@ -278,7 +287,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 	return newSize;
 }
 
-int llread(int fd, char* buffer){
+int llread(int fd, char* buffer) {
 	int STOP = FALSE;
 
 	//0 - Before receiving the first FLAG flag | 1 - After receiving the first FLAG flag and before receiving the last FLAG flag || 2 - After receiving the last
@@ -286,7 +295,7 @@ int llread(int fd, char* buffer){
 	int state = 0;
 	int size = 0;
 
-	char* buffer = (char*)malloc(3000);
+	char* buff = (char*)malloc(3000);
 
 	while(!STOP){
 
@@ -302,14 +311,14 @@ int llread(int fd, char* buffer){
 		switch(state){
 			case 0:
 				if(c == FLAG) {
-					buffer[size] = c;
+					buff[size] = c;
 					size++;
 					state = 1;
 				}
 				break;
 			case 1:
 				if(c == FLAG && size != 1) {
-					buffer[size] = c;
+					buff[size] = c;
 					size++;
 					state = 2;
 				}
@@ -317,7 +326,7 @@ int llread(int fd, char* buffer){
 				else if(c == FLAG && size == 1){;}
 
 				else {
-					buffer[size] = c;
+					buff[size] = c;
 					size++;
 				}
 				break;
@@ -328,11 +337,11 @@ int llread(int fd, char* buffer){
 	}
 
 	int process = FALSE;
-	int newSize = dataDestuffing(buffer, size);
+	int newSize = dataDestuffing(buff, size);
 
-	if(buffer[0] != FLAG || buffer[1] != A_TR || buffer[3] != (buffer[1] ^ buffer[2])){
+	if(buff[0] != FLAG || buff[1] != A_TR || buff[3] != (buff[1] ^ buff[2])){
 		printf("Received frame header was not corretly built\n");
-		free(buffer); 
+		free(buff); 
 		return -1;
 	}
 
@@ -340,10 +349,10 @@ int llread(int fd, char* buffer){
 	int dataPackageSize = newSize - 6 * sizeof(char);
 
 	//Creates BCC2 depending on the data field
-	char BCC2 = findBCC2(&buffer[4], dataPackageSize);
+	char BCC2 = findBCC2(&buff[4], dataPackageSize);
 	
 	//Only the last bit is considered
-	unsigned int sequenceNumber = (buffer[2] >> 6) & 1;
+	unsigned int sequenceNumber = (buff[2] >> 6) & 1;
 
 	char response[SUPERVISIONPACKAGE * sizeof(char)];
 	response[0] = FLAG;
@@ -351,147 +360,189 @@ int llread(int fd, char* buffer){
 	response[4] = FLAG;
 
 	//If the right frame was received (With the expected sequence number)
-	if(linkLayer->sequenceNumber == sequenceNumber){
+	if(link->sequenceNumber == sequenceNumber) {
 
 		//If the data BBC does not match, the frame was corrupted
-		if(BCC2 != buffer[newSize - 2]) {
+		if(BCC2 != buff[newSize - 2]) {
 			printf("Data BCC does not match the data BCC received.\nFrame rejected.\n");
-			response[2] = (linkLayer->sequenceNumber << 7) | C_REJ;
+			response[2] = (link->sequenceNumber << 7) | C_REJ;
 		}
-		else{
+		else {
 			//Updates the sequenceNumber to the next one
-			if(linkLayer->sequenceNumber == 0) {
-				linkLayer->sequenceNumber = 1;
+			if(link->sequenceNumber == 0) {
+				link->sequenceNumber = 1;
 			}
 		  	else {
-		  		linkLayer->sequenceNumber = 0;
+		  		link->sequenceNumber = 0;
 		  	}
 		  	process = TRUE;
 			
 			//Sends RR as a response			  	
-			response[2] = (linkLayer->sequenceNumber << 7) | C_RR;
+			response[2] = (link->sequenceNumber << 7) | C_RR;
 	  }
 	}
 	else{
-		//
-		response[2] = (linkLayer->sequenceNumber << 7) | C_RR;
+		//If it's duplicate, send RR response with the same sequence number that was updated when the frame was received the first time
+		response[2] = (link->sequenceNumber << 7) | C_RR;
 	}
 
-	response[3] = response[1] ^ response[2];
+	//BCC1
+	response[3] = response[1]^response[2];
+	
+	//Sends the response
 	sendMessage(fd, response);
 	
+	//If the Information frame was accepted 
 	if(process) {
-		memcpy(buffer, &buffer[4], dataSize);
-		free(buf);
-		return dataSize;
+
+		//Updates the argument buffer to contain the data
+		memcpy(buffer, &buff[4], dataPackageSize);
+		free(buff);
+		return dataPackageSize;
 	}
-	free(buf);
+
+	free(buff);
 	return -1;
 }
 
 int llclose(int fd, int mode){
-	printf("closing\n");
+	printf("Closing\n");
 	int disc = 0, counter = 0;
 
-	//TRSNAMITTER
 	if(TRANSMITTER == mode){
-		while(0 == disc){
-			while(counter < TRIESMAX){
-				char* discPackage = malloc(CONTROLPACKAGESIZE * sizeof(char));				
+		while(0 == disc) {
 
+			//Only retries to send the frame if the time was exceeded
+			if(counter == 0 || timeExceeded) {
+				
+				//If the number of tries was exceeded
+				if(counter >= link->triesMAX) {
+					printf("Unable to disconnect.\n");			
+					return -1;
+				}
+			
+				//Allocates memory for the disconnect frame
+				char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+				
+				//Builds the disconnect frame
 				discPackage[0] = FLAG;
 				discPackage[1] = A_TR;
 				discPackage[2] = C_DISC;
-				discPackage[3] = (buf[1]^buf[2]);
+				discPackage[3] = (discPackage[1]^discPackage[2]);
 				discPackage[4] = FLAG;
 
-				if(sendMessage(fd, discPackage) < 0){
-					"Message failed sending \n";
+				//Sends the disconnect frame
+				if(sendMessage(fd, discPackage) < 0) {
+					printf("Unable to send disconnect frame.\n");
 					return -1;
 				}
+
 				free(discPackage);
-
+				
+				//Updates the number of tries
 				counter++;
-
 			}
-
-			char* response = malloc(CONTROLPACKAGESIZE * sizeof(char));
-
-			if(receiveMessage(fd, response) < 0){
-				"Message failed receiving \n";
+			
+			//Allocates space for the response
+			char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+		
+			//Reads the response
+			if(receiveMessage(fd, response) < 0) {
+				printf("Unable to read disconnect response.\n");
 				return -1;				
 			}
-			if(response[1] == A_TR && response[2] == C_DISC){
-				disconnected = 1;
-		
-				char* UA = malloc(CONTROLPACKAGESIZE * sizeof(char));				
 
+			//If the received frame is the disconnect frame, it disconnected successfully
+			if(response[1] == A_RT && response[2] == C_DISC) {
+				disc = 1;
+				
+				//Allocates space for the response (UA)
+				char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+
+				//Builds the UA frame to respond
 				UA[0] = FLAG;
-				UA[1] = A_TR;
+				UA[1] = A_RT;
 				UA[2] = C_UA;
-				UA[3] = (buf[1]^buf[2]);
+				UA[3] = (UA[1]^UA[2]);
 				UA[4] = FLAG;
 
-				if(sendMessage(fd, UA) < 0){
-					"Message failed sending \n";
+				//Sends the UA frame as a response
+				if(sendMessage(fd, UA) < 0) {
+					printf("Unable to write UA frame as a response to disconnect.\n");
 					return -1;					
 				}
-					
+				
 				free(UA);
-
-				printf("UA sent: disconected.\n");
+				printf("Disconnected.\n");
 			}
+			free(response);
 		}
 	}
-
-	else if(RECEIVER == mode){
-		while(0 == disc){
-			char* discPackage = malloc(CONTROLPACKAGESIZE * sizeof(char));				
-
-			if(receiveMessage(fd, discPackage) < 0){
-				"Message failed receiving \n";
-				return -1;				
-			}
-				
-			if(discPackage[1] == A_TR && discPackage[2] == C_DISC);
-			while(counter < TRIESMAX){
-				char* response = malloc(CONTROLPACKAGESIZE * sizeof(char));				
-
-				response[0] = FLAG;
-				response[1] = A_TR;
-				response[2] = C_DISC;
-				response[3] = (buf[1]^buf[2]);
-				response[4] = FLAG;
-
-				sendMessage(fd, response){
-					"Message failed sending \n";
-					return -1;					
-				}
-				free(response);
-
-				counter++;
-
-			}
-			free(discPackage);
-
-			char* UA = malloc(CONTROLPACKAGESIZE * sizeof(char));
-
-			if(receiveMessage(fd, UA) < 0){
-				"Message failed sending \n";
-				return -1;				
-			}
-
-			if(UA[1] == A_TR && UA[2] == C_UA){
-				disconnected = 1;
-
-				free(UA);
-
-				printf("UA received: disconected.\n");
-			}
-		}			
-	}
+	else if(RECEIVER == mode) {
+		
+		//Allocates memory for the disconnect frame read from the transmitter
+		char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+		
+		//Reads the disconnect frame
+		if(receiveMessage(fd, discPackage) < 0){
+			printf("Unable to receive disconnect package from transmitter.\n");
+			return -1;				
+		}				
 	
-	return 1;
+		//If the frame received is the disconnect frame
+		if(discPackage[1] == A_TR && discPackage[2] == C_DISC) {
+
+			//While it's not disconnected
+			while(0 == disc) {
+
+				//It only resends if the time has exceeded
+				if (counter == 0 || timeExceeded) {
+					if (counter >= link->triesMAX) {
+						printf("Unable to disconnect.\n");
+						return -1;
+					}
+
+					//Allocates memory for the disconnect response
+					char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+
+					//Builds the disconnect response
+					response[0] = FLAG;
+					response[1] = A_RT;
+					response[2] = C_DISC;
+					response[3] = (response[1]^response[2]);
+					response[4] = FLAG;
+
+					//Sends the disconnect frame as a response
+					if(sendMessage(fd, response) < 0) {
+						printf("Unable to send disconnect frame as a response.\n");
+						return -1;					
+					}
+
+					free(response);
+					counter++;
+				}
+
+				//Allocates memory for the UA response from the transmitter
+				char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+
+				//Reads the UA response
+				if(receiveMessage(fd, UA) < 0) {
+					printf("Unable to read the UA response from the transmitter\n");
+					return -1;				
+				}
+
+				//If the UA response is accepted
+				if(UA[1] == A_RT && UA[2] == C_UA) {
+					disc = 1;
+					free(UA);
+					printf("Disconnected.\n");
+				}
+			}
+		}
+		free(discPackage);			
+	}
+
+	return 0;
 }
 
 unsigned int dataStuffing(char* buffer, unsigned int frameSize) {
@@ -507,7 +558,7 @@ unsigned int dataStuffing(char* buffer, unsigned int frameSize) {
 			newframeSize++;
 	
 	//Reallocates memory for the buffer, adding more space in the end		
-	buffer = (char*) realloc(buf, newframeSize);
+	buffer = (char*) realloc(buffer, newframeSize);
 	
 	for (i = 1; i < frameSize - 1; i++) {
 	
@@ -534,20 +585,20 @@ unsigned int dataDestuffing(char* buffer, unsigned int frameSize){
 	int i;
 	for (i = 1; i < frameSize - 1; i++) {
 		//ESCAPE = 0x7d
-		if (buf[i] == ESCAPE) {
+		if (buffer[i] == ESCAPE) {
 		
 			//Moves the array one position to the left, eliminating the ESCAPE flag
-			memmove(buf + i, buf + i + 1, frameSize - i - 1);
+			memmove(buffer + i, buffer + i + 1, frameSize - i - 1);
 			frameSize--;
 			
 			//Applies exclusive or to the flag to restore the previous byte
-			buf[i] ^= 0x20;
+			buffer[i] ^= 0x20;
 			
 		}
 	}
 	
 	//Reallocates memory deleting the last position that are not part of the original frame
-	buf = (char*) realloc(buf, frameSize);
+	buffer = (char*) realloc(buffer, frameSize);
 
 	//Returns the size of the original frame
 	return frameSize;
@@ -559,7 +610,7 @@ char findBCC2(char* data, unsigned int size) {
 	char BCC2 = 0;
 	
 	//Iterates through the data buffer and apply the exclusive or to all the elements
-	for(i = 0; i < size; i++){
+	for(i = 0; i < size; i++) {
 		BCC2 ^= data[i];
 	}
 
