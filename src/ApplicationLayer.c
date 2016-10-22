@@ -135,10 +135,10 @@ int send(){
 	unsigned int bytesRead;
 	
 	//C N L2 L1 P(messageSize)
-	char* data = (char*)malloc((application->messageSize + 4) * sizeof(char));
+	unsigned char* data = (unsigned char*)malloc((application->messageSize + 4) * sizeof(unsigned char));
 
 	//Initializes the data package sequence number
-	int packageSequenceNumber = 0;
+	unsigned int packageSequenceNumber = 0;
 	
 	//Iteration that reads while there is something to read
 	while((bytesRead = fread(data + 4, sizeof(char), application->messageSize, file)) > 0) {
@@ -147,7 +147,9 @@ int send(){
 		data[0] = 1;
 
 		//N - Package sequence number
-		data[1] = packageSequenceNumber % 255;
+		data[1] = (packageSequenceNumber % 255);
+
+		printf("Data package %d.\n", data[1]);
 		
 		//L2 - bytes / 256
 		data[2] = bytesRead >> 8;

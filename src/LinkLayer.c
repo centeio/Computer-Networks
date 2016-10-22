@@ -121,7 +121,7 @@ int llopen(int fd, int status) {
 	int counter = 0, isConnected = FALSE;
 
 	if(TRANSMITTER == status) {
-		while(!isConnected) {
+		while(isConnected == FALSE) {
 			
 			//Only retries to send the frame if the time was Exceeded
 			if(counter == 0 || timeExceeded) {
@@ -165,7 +165,7 @@ int llopen(int fd, int status) {
 		}
 		timeExceeded = 0;
 	} else {
-		while(!isConnected) {
+		while(isConnected == FALSE) {
 			
 			//Allocates memory to receive the set frame
 			char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
@@ -232,6 +232,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 				return -1;
 			}
 			
+			printf("%x, %x, %x, %x.\n", frame[0], frame[1], frame[2], frame[3]);
 			//Sends Information frame
 			if(write(fd, frame, newSize) == -1){
 				printf("Unable to write data package\n");
@@ -245,10 +246,11 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 
 		receiveMessage(fd, response);
 		
-		if(response[0] == FLAG || response[1] == A_TR) {
+		if(response[0] == FLAG && response[1] == A_TR) {
 			
 			//If the Information frame was rejected
 			if((response[2] & 0x0F) == C_REJ) {
+				printf("REJ\n");
 
 				//If the sequence number is the same as the one sent, retry to send the Information frame
 				if((response[2] >> 6) == link->sequenceNumber) {
@@ -264,17 +266,18 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 			}
 
 			else if ((response[2] & 0x0F) == C_RR) {
+				printf("RR\n");
 				
 				//If the sequence number is not the same as the one sent, the frame was accepted 
-				if((response[2] >> 6) != link->sequenceNumber) {
+				if((response[2] >> 7) != link->sequenceNumber) {
 					alarm(0);
-					link->sequenceNumber = (response[2] >> 6);
+					link->sequenceNumber = (response[2] >> 7);
 					STOP = TRUE;
 				}
 
 				//The header of the package was accepted, but the data field needs to be resent
 				else {
-
+					
 					//Sets timeExceeded to 1 to be able to resend the Information frame
 					handleAlarm();
 				}
@@ -282,6 +285,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 		}
 	}
 	
+	free(frame);
 	//Reset timeExceeded flag
 	timeExceeded = 0;
 
@@ -353,7 +357,7 @@ int llread(int fd, char* buffer) {
 	char BCC2 = findBCC2(&buff[4], dataPackageSize);
 	
 	//Only the last bit is considered
-	unsigned int sequenceNumber = (buff[2] >> 6) & 1;
+	unsigned int sequenceNumber = (buff[2] >> 7) & 1;
 
 	char response[SUPERVISIONPACKAGE * sizeof(char)];
 	response[0] = FLAG;
