@@ -121,7 +121,7 @@ int llopen(int fd, int status) {
 	int counter = 0, isConnected = FALSE;
 
 	if(TRANSMITTER == status) {
-		while(!isConnected) {
+		while(isConnected == FALSE) {
 			
 			//Only retries to send the frame if the time was Exceeded
 			if(counter == 0 || timeExceeded) {
@@ -165,7 +165,7 @@ int llopen(int fd, int status) {
 		}
 		timeExceeded = 0;
 	} else {
-		while(!isConnected) {
+		while(isConnected == FALSE) {
 			
 			//Allocates memory to receive the set frame
 			char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
@@ -337,6 +337,7 @@ int llread(int fd, char* buffer) {
 		}
 	}
 
+	printf("%x %x %x %x.\n", buff[0], buff[1], buff[2], buff[3]);
 	int process = FALSE;
 	int newSize = dataDestuffing(buff, size);
 
@@ -390,6 +391,7 @@ int llread(int fd, char* buffer) {
 	//BCC1
 	response[3] = response[1]^response[2];
 	
+	printf("Stuck.\n");
 	//Sends the response
 	sendMessage(fd, response);
 	
