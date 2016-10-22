@@ -225,7 +225,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 		
 		//It only retries to send the code if the time was exceeded
 		if(counter == 0 || timeExceeded){
-
+			timeExceeded = 0;
 			//If the number of tries was exceeded
 			if (counter >= link->triesMAX) {
 				printf("Unable to send data package.\n");
@@ -415,7 +415,7 @@ int llclose(int fd, int mode){
 
 			//Only retries to send the frame if the time was exceeded
 			if(counter == 0 || timeExceeded) {
-				
+				timeExceeded = 0;
 				//If the number of tries was exceeded
 				if(counter >= link->triesMAX) {
 					printf("Unable to disconnect.\n");			
@@ -439,6 +439,7 @@ int llclose(int fd, int mode){
 				}
 
 				free(discPackage);
+				alarm(link->timeout);
 				
 				//Updates the number of tries
 				counter++;
@@ -498,6 +499,8 @@ int llclose(int fd, int mode){
 
 				//It only resends if the time has exceeded
 				if (counter == 0 || timeExceeded) {
+					timeExceeded = 0;
+
 					if (counter >= link->triesMAX) {
 						printf("Unable to disconnect.\n");
 						return -1;
@@ -521,6 +524,7 @@ int llclose(int fd, int mode){
 
 					free(response);
 					counter++;
+					alarm(link->timeout);
 				}
 
 				//Allocates memory for the UA response from the transmitter
