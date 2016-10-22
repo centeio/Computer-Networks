@@ -215,8 +215,8 @@ int receive(){
 		int dataSize = llread(application->fd, package);
 		
 		//If llread didn't fail reading the data package	
-		if(dataSize > 0){
-				
+		if(dataSize > 0) {
+			printf("%x.\n", package[0]);
 			//If the package received is the end package
 			if(3 == package[0])
 				received = 1;
@@ -251,7 +251,7 @@ int receive(){
 				}
 
 				//Creates a new file with the name sent by the transmitter
-				if(fopen(fileName, "wb") < 0){
+				if((file = fopen(fileName, "wb")) < 0){
 					printf("Unable to open the file.\n");
 					return -1;
 				}
@@ -259,6 +259,7 @@ int receive(){
 
 			//If the package received is a data package
 			if(1 == package[0] && file != NULL) { 
+				printf("Writing to the file.\n");
 				//Prints the data package sequence number
 				printf("Data package: %d.\n", package[1]);
 				int psize = (unsigned char)package[2] << 8 | (unsigned char)package[3]; //(K = 256*L2+L1)

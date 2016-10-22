@@ -341,6 +341,7 @@ int llread(int fd, char* buffer) {
 		}
 	}
 
+	printf("%x %x %x %x.\n", buff[0], buff[1], buff[2], buff[3]);
 	int process = FALSE;
 	int newSize = dataDestuffing(buff, size);
 
@@ -394,6 +395,7 @@ int llread(int fd, char* buffer) {
 	//BCC1
 	response[3] = response[1]^response[2];
 	
+	printf("Stuck.\n");
 	//Sends the response
 	sendMessage(fd, response);
 	
