@@ -134,7 +134,7 @@ int llopen(int fd, int status) {
 				}
 			
 				//Builds the set frame
-				char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+				unsigned char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 				setPackage[0] = FLAG;
 				setPackage[1] = A_TR;
 				setPackage[2] = C_SET;
@@ -149,7 +149,7 @@ int llopen(int fd, int status) {
 			}
 			
 			//Allocates memory to receive the message
-			char* receivedMessage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+			unsigned char* receivedMessage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 			alarm(link->timeout);
 		
 			//If a message was read
@@ -168,7 +168,7 @@ int llopen(int fd, int status) {
 		while(isConnected == FALSE) {
 			
 			//Allocates memory to receive the set frame
-			char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+			unsigned char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 			
 			//Reads the message from the port
 			receiveMessage(fd, setPackage);
@@ -177,7 +177,7 @@ int llopen(int fd, int status) {
 			if(setPackage[1] == A_TR && setPackage[2] == C_SET) {
 
 				//Builds the frame UA to send
-				char* uaPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+				unsigned char* uaPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 
 				uaPackage[0] = FLAG;
 				uaPackage[1] = A_TR;
@@ -242,7 +242,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 			alarm(link->timeout);
 		}
 
-		char response[SUPERVISIONPACKAGE];
+		unsigned char response[SUPERVISIONPACKAGE];
 
 		receiveMessage(fd, response);
 		
@@ -360,7 +360,7 @@ int llread(int fd, char* buffer) {
 	//Only the last bit is considered
 	unsigned int sequenceNumber = (buff[2] >> 7) & 1;
 
-	char response[SUPERVISIONPACKAGE * sizeof(char)];
+	unsigned char response[SUPERVISIONPACKAGE * sizeof(char)];
 	response[0] = FLAG;
 	response[1] = A_TR;
 	response[4] = FLAG;
@@ -401,14 +401,17 @@ int llread(int fd, char* buffer) {
 	
 	//If the Information frame was accepted 
 	if(process) {
-
+		printf("cheguei1\n");
 		//Updates the argument buffer to contain the data
 		memcpy(buffer, &buff[4], dataPackageSize);
 		free(buff);
+		printf("cheguei2\n");		
 		return dataPackageSize;
+		
 	}
 
 	free(buff);
+	printf("cheguei3\n");	
 	return -1;
 }
 
@@ -429,7 +432,7 @@ int llclose(int fd, int mode){
 				}
 			
 				//Allocates memory for the disconnect frame
-				char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+				unsigned char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 				
 				//Builds the disconnect frame
 				discPackage[0] = FLAG;
@@ -452,7 +455,7 @@ int llclose(int fd, int mode){
 			}
 			
 			//Allocates space for the response
-			char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+			unsigned char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 		
 			//Reads the response
 			if(receiveMessage(fd, response) < 0) {
@@ -465,7 +468,7 @@ int llclose(int fd, int mode){
 				disc = 1;
 				
 				//Allocates space for the response (UA)
-				char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+				unsigned char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 
 				//Builds the UA frame to respond
 				UA[0] = FLAG;
@@ -489,7 +492,7 @@ int llclose(int fd, int mode){
 	else if(RECEIVER == mode) {
 		
 		//Allocates memory for the disconnect frame read from the transmitter
-		char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+		unsigned char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 		
 		//Reads the disconnect frame
 		if(receiveMessage(fd, discPackage) < 0){
@@ -513,7 +516,7 @@ int llclose(int fd, int mode){
 					}
 
 					//Allocates memory for the disconnect response
-					char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+					unsigned char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 
 					//Builds the disconnect response
 					response[0] = FLAG;
@@ -534,7 +537,7 @@ int llclose(int fd, int mode){
 				}
 
 				//Allocates memory for the UA response from the transmitter
-				char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+				unsigned char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 
 				//Reads the UA response
 				if(receiveMessage(fd, UA) < 0) {
