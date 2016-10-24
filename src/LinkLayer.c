@@ -134,7 +134,7 @@ int llopen(int fd, int status) {
 				}
 			
 				//Builds the set frame
-				unsigned char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+				unsigned char* setPackage = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 				setPackage[0] = FLAG;
 				setPackage[1] = A_TR;
 				setPackage[2] = C_SET;
@@ -149,7 +149,7 @@ int llopen(int fd, int status) {
 			}
 			
 			//Allocates memory to receive the message
-			unsigned char* receivedMessage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+			unsigned char* receivedMessage = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 			alarm(link->timeout);
 		
 			//If a message was read
@@ -168,7 +168,7 @@ int llopen(int fd, int status) {
 		while(isConnected == FALSE) {
 			
 			//Allocates memory to receive the set frame
-			unsigned char* setPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+			unsigned char* setPackage = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 			
 			//Reads the message from the port
 			receiveMessage(fd, setPackage);
@@ -177,7 +177,7 @@ int llopen(int fd, int status) {
 			if(setPackage[1] == A_TR && setPackage[2] == C_SET) {
 
 				//Builds the frame UA to send
-				unsigned char* uaPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+				unsigned char* uaPackage = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 
 				uaPackage[0] = FLAG;
 				uaPackage[1] = A_TR;
@@ -201,7 +201,7 @@ int llopen(int fd, int status) {
 int llwrite(int fd, char* buffer, unsigned int length) {
 
 	//6 for the F, A, C, BCC1, BCC2 and F
-	char* frame = (char*)malloc(length + 6 * sizeof(char));
+	unsigned char* frame = (unsigned char*)malloc(length + 6 * sizeof(char));
 	
 	//Creates the BBC2 flag depeding on the data
 	char BCC2 = findBCC2(buffer, length);
@@ -300,7 +300,7 @@ int llread(int fd, char* buffer) {
 	int state = 0;
 	int size = 0;
 
-	char* buff = (char*)malloc(3000);
+	unsigned char* buff = (unsigned char*)malloc(3000);
 
 	while(!STOP){
 
@@ -432,7 +432,7 @@ int llclose(int fd, int mode){
 				}
 			
 				//Allocates memory for the disconnect frame
-				unsigned char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+				unsigned char* discPackage = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 				
 				//Builds the disconnect frame
 				discPackage[0] = FLAG;
@@ -455,7 +455,7 @@ int llclose(int fd, int mode){
 			}
 			
 			//Allocates space for the response
-			unsigned char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+			unsigned char* response = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 		
 			//Reads the response
 			if(receiveMessage(fd, response) < 0) {
@@ -468,7 +468,7 @@ int llclose(int fd, int mode){
 				disc = 1;
 				
 				//Allocates space for the response (UA)
-				unsigned char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+				unsigned char* UA = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 
 				//Builds the UA frame to respond
 				UA[0] = FLAG;
@@ -492,7 +492,7 @@ int llclose(int fd, int mode){
 	else if(RECEIVER == mode) {
 		
 		//Allocates memory for the disconnect frame read from the transmitter
-		unsigned char* discPackage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+		unsigned char* discPackage = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 		
 		//Reads the disconnect frame
 		if(receiveMessage(fd, discPackage) < 0){
@@ -516,7 +516,7 @@ int llclose(int fd, int mode){
 					}
 
 					//Allocates memory for the disconnect response
-					unsigned char* response = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
+					unsigned char* response = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));				
 
 					//Builds the disconnect response
 					response[0] = FLAG;
@@ -537,7 +537,7 @@ int llclose(int fd, int mode){
 				}
 
 				//Allocates memory for the UA response from the transmitter
-				unsigned char* UA = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
+				unsigned char* UA = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
 
 				//Reads the UA response
 				if(receiveMessage(fd, UA) < 0) {
@@ -574,7 +574,7 @@ unsigned int dataStuffing(char* buffer, unsigned int frameSize) {
 			newframeSize++;
 	
 	//Reallocates memory for the buffer, adding more space in the end		
-	buffer = (char*) realloc(buffer, newframeSize);
+	buffer = (unsigned char*) realloc(buffer, newframeSize);
 	
 	for (i = 1; i < frameSize - 1; i++) {
 	
@@ -614,7 +614,7 @@ unsigned int dataDestuffing(char* buffer, unsigned int frameSize){
 	}
 	
 	//Reallocates memory deleting the last position that are not part of the original frame
-	buffer = (char*) realloc(buffer, frameSize);
+	buffer = (unsigned char*) realloc(buffer, frameSize);
 
 	//Returns the size of the original frame
 	return frameSize;
