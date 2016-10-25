@@ -4,8 +4,10 @@
 #include <termios.h>
 #include <stdio.h>
 #include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
-
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
@@ -26,7 +28,7 @@
 #define SUPERVISIONPACKAGE 5
 
 struct linkLayer {
-    char port[20];
+    unsigned char port[20];
     unsigned int sequenceNumber;
     unsigned int timeout;
     unsigned int triesMAX;
@@ -47,13 +49,13 @@ struct termios oldtio,newtio;
 unsigned int timeExceeded;
 
 void handleAlarm();
-int sendMessage(int fd, char* message);
-int receiveMessage(int fd, char* message);
-int initializeLinkLayer(int fd, char * port, int triesMAX, int timeout);
+int sendMessage(int fd, unsigned char* message);
+int receiveMessage(int fd, unsigned char* message);
+int initializeLinkLayer(int fd, unsigned char * port, int triesMAX, int timeout);
 int llopen(int fd, int connectionMode);
-int llwrite(int fd, char* buffer, unsigned int length);
-int llread(int fd, char* buffer);
+int llwrite(int fd, unsigned char* buffer, unsigned int length);
+int llread(int fd, unsigned char* buffer);
 int llclose(int fd, int mode);
-unsigned int dataStuffing(char* buffer, unsigned int frameSize);
-unsigned int dataDestuffing(char* buffer, unsigned int frameSize);
-char findBCC2(char* data, unsigned int size);
+unsigned int dataStuffing(unsigned char* buffer, unsigned int frameSize);
+unsigned int dataDestuffing(unsigned char* buffer, unsigned int frameSize);
+unsigned char findBCC2(unsigned char* data, unsigned int size);

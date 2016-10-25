@@ -6,7 +6,7 @@ int writeControlPackage(int control, char* fileName, char* fileSize) {
     unsigned int controlPackageSize = 5 + strlen(fileSize) + strlen(fileName);
 
 	//Initializes control package variable
-    char controlPackage[controlPackageSize];
+    unsigned char controlPackage[controlPackageSize];
 
 	//for loop counter
     int i;
@@ -38,13 +38,13 @@ int writeControlPackage(int control, char* fileName, char* fileSize) {
     return llwrite(application->fd, controlPackage, controlPackageSize);
 }
 
-int initializeApplicationLayer(char* port, unsigned int messageSize, int retries, int timeout, char* fileName, int status) {
+int initializeApplicationLayer(unsigned char* port, unsigned int messageSize, int retries, int timeout, unsigned char* fileName, int status) {
     
     //Allocates memory for application struct
     application = (struct applicationLayer*) malloc(sizeof(struct applicationLayer));
     
     //Opens the port and stores the file descriptor in the application structure
-    application->fd = open(port, O_RDWR | O_NOCTTY );
+    application->fd = open((char *)port, O_RDWR | O_NOCTTY );
     
     //Stores the messageSize in the application structure
     application->messageSize = messageSize;
@@ -109,7 +109,7 @@ int send(){
 	fseek(file, 0, SEEK_SET);
 	
 	//Declaration of the array that will store the file size
-	char sizeString[10];
+	unsigned char sizeString[10];
 
 	//Transforms the size of the file into a string
 	sprintf(sizeString, "%u", fileSize);
@@ -141,7 +141,7 @@ int send(){
 	unsigned int packageSequenceNumber = 0;
 	
 	//Iteration that reads while there is something to read
-	while((bytesRead = fread(data + 4, sizeof(char), application->messageSize, file)) > 0) {
+	while((bytesRead = fread(data + 4, sizeof(unsigned char), application->messageSize, file)) > 0) {
 
 		//C - Data which is represented as the number 1
 		data[0] = 1;
@@ -202,9 +202,9 @@ int receive(){
 
 	//Variable initialization
 	FILE* file; 
-	char fileName[30] = "";
-	char fileSize[10] = "";
-	char package[3000];
+	unsigned char fileName[30] = "";
+	unsigned char fileSize[10] = "";
+	unsigned char package[3000];
 
    	memset(package, 0, 3000);
 
@@ -263,7 +263,7 @@ int receive(){
 				//Prints the data package sequence number
 				printf("Data package: %d.\n", package[1]);
 				int psize = (unsigned char)package[2] << 8 | (unsigned char)package[3]; //(K = 256*L2+L1)
-				fwrite(&package[4], sizeof(char), psize, file);
+				fwrite(&package[4], sizeof(unsigned char), psize, file);
 			}
 		}
 
