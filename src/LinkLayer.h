@@ -28,7 +28,7 @@
 #define SUPERVISIONPACKAGE 5
 
 struct linkLayer {
-    unsigned char port[20];
+    char port[20];
     unsigned int sequenceNumber;
     unsigned int timeout;
     unsigned int triesMAX;
@@ -51,7 +51,7 @@ unsigned int timeExceeded;
 void handleAlarm();
 int sendMessage(int fd, unsigned char* message);
 int receiveMessage(int fd, unsigned char* message);
-int initializeLinkLayer(int fd, unsigned char * port, int triesMAX, int timeout);
+int initializeLinkLayer(int fd, char * port, int triesMAX, int timeout);
 int llopen(int fd, int connectionMode);
 int llwrite(int fd, unsigned char* buffer, unsigned int length);
 int llread(int fd, unsigned char* buffer);

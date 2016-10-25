@@ -38,13 +38,13 @@ int writeControlPackage(int control, char* fileName, char* fileSize) {
     return llwrite(application->fd, controlPackage, controlPackageSize);
 }
 
-int initializeApplicationLayer(unsigned char* port, unsigned int messageSize, int retries, int timeout, unsigned char* fileName, int status) {
+int initializeApplicationLayer(char* port, unsigned int messageSize, int retries, int timeout, char* fileName, int status) {
     
     //Allocates memory for application struct
     application = (struct applicationLayer*) malloc(sizeof(struct applicationLayer));
     
     //Opens the port and stores the file descriptor in the application structure
-    application->fd = open((char *)port, O_RDWR | O_NOCTTY );
+    application->fd = open(port, O_RDWR | O_NOCTTY );
     
     //Stores the messageSize in the application structure
     application->messageSize = messageSize;
@@ -202,7 +202,7 @@ int receive(){
 
 	//Variable initialization
 	FILE* file; 
-	unsigned char fileName[30] = "";
+	char fileName[30] = "";
 	unsigned char fileSize[10] = "";
 	unsigned char package[3000];
 

@@ -69,7 +69,7 @@ int receiveMessage(int fd, unsigned char* message) {
 	return 0;
 }
 
-int initializeLinkLayer(int fd, unsigned char * port, int triesMAX, int timeout) {
+int initializeLinkLayer(int fd, char * port, int triesMAX, int timeout) {
 	
 	//Allocates memory for the linkLayer structure
 	llink = (struct linkLayer*)malloc(sizeof(struct linkLayer));
