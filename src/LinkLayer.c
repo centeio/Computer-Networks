@@ -72,13 +72,13 @@ int receiveMessage(int fd, char* message) {
 int initializeLinkLayer(int fd, char * port, int triesMAX, int timeout) {
 	
 	//Allocates memory for the linkLayer structure
-	link = (struct linkLayer*)malloc(sizeof(struct linkLayer));
+	llink = (struct linkLayer*)malloc(sizeof(struct linkLayer));
 	
-	//Initializes link layer structure
-	strcpy(link->port, port);
-	link->timeout = timeout;
-	link->triesMAX = triesMAX;
-	link->sequenceNumber = 0;
+	//Initializes llink layer structure
+	strcpy(llink->port, port);
+	llink->timeout = timeout;
+	llink->triesMAX = triesMAX;
+	llink->sequenceNumber = 0;
     
     //Set up alarm routine
 	(void) signal(SIGALRM, handleAlarm);
@@ -128,7 +128,7 @@ int llopen(int fd, int status) {
 				timeExceeded = 0;
 				
 				//If the number of tries was exceeded
-				if(counter >= link->triesMAX) {
+				if(counter >= llink->triesMAX) {
 					printf("Unable to establising connection.\n");			
 					return -1;
 				}
@@ -150,7 +150,7 @@ int llopen(int fd, int status) {
 			
 			//Allocates memory to receive the message
 			unsigned char* receivedMessage = (unsigned char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
-			alarm(link->timeout);
+			alarm(llink->timeout);
 		
 			//If a message was read
 			if(receiveMessage(fd, receivedMessage) != -1) {
@@ -209,7 +209,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 	//Builds the frame to send
 	frame[0] = FLAG;
 	frame[1] = A_TR;
-	frame[2] = (link->sequenceNumber << 6);
+	frame[2] = (llink->sequenceNumber << 6);
 	frame[3] = frame[1]^frame[2];
 	memcpy(&frame[4], buffer, length);
 	frame[4 + length] = BCC2;
@@ -227,7 +227,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 		if(counter == 0 || timeExceeded){
 			timeExceeded = 0;
 			//If the number of tries was exceeded
-			if (counter >= link->triesMAX) {
+			if (counter >= llink->triesMAX) {
 				printf("Unable to send data package.\n");
 				return -1;
 			}
@@ -239,7 +239,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 				return -1;
 			}
 			counter++;
-			alarm(link->timeout);
+			alarm(llink->timeout);
 		}
 
 		unsigned char response[SUPERVISIONPACKAGE];
@@ -253,7 +253,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 				printf("REJ\n");
 
 				//If the sequence number is the same as the one sent, retry to send the Information frame
-				if((response[2] >> 6) == link->sequenceNumber) {
+				if((response[2] >> 6) == llink->sequenceNumber) {
 				  alarm(0);
 				  counter = 0;
 				}
@@ -269,9 +269,9 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 				printf("RR\n");
 				
 				//If the sequence number is not the same as the one sent, the frame was accepted 
-				if((response[2] >> 7) != link->sequenceNumber) {
+				if((response[2] >> 7) != llink->sequenceNumber) {
 					alarm(0);
-					link->sequenceNumber = (response[2] >> 7);
+					llink->sequenceNumber = (response[2] >> 7);
 					STOP = TRUE;
 				}
 
@@ -366,30 +366,30 @@ int llread(int fd, char* buffer) {
 	response[4] = FLAG;
 
 	//If the right frame was received (With the expected sequence number)
-	if(link->sequenceNumber == sequenceNumber) {
+	if(llink->sequenceNumber == sequenceNumber) {
 
 		//If the data BBC does not match, the frame was corrupted
 		if(BCC2 != buff[newSize - 2]) {
 			printf("Data BCC does not match the data BCC received.\nFrame rejected.\n");
-			response[2] = (link->sequenceNumber << 7) | C_REJ;
+			response[2] = (llink->sequenceNumber << 7) | C_REJ;
 		}
 		else {
 			//Updates the sequenceNumber to the next one
-			if(link->sequenceNumber == 0) {
-				link->sequenceNumber = 1;
+			if(llink->sequenceNumber == 0) {
+				llink->sequenceNumber = 1;
 			}
 		  	else {
-		  		link->sequenceNumber = 0;
+		  		llink->sequenceNumber = 0;
 		  	}
 		  	process = TRUE;
 			
 			//Sends RR as a response			  	
-			response[2] = (link->sequenceNumber << 7) | C_RR;
+			response[2] = (llink->sequenceNumber << 7) | C_RR;
 	  }
 	}
 	else{
 		//If it's duplicate, send RR response with the same sequence number that was updated when the frame was received the first time
-		response[2] = (link->sequenceNumber << 7) | C_RR;
+		response[2] = (llink->sequenceNumber << 7) | C_RR;
 	}
 
 	//BCC1
@@ -426,7 +426,7 @@ int llclose(int fd, int mode){
 			if(counter == 0 || timeExceeded) {
 				timeExceeded = 0;
 				//If the number of tries was exceeded
-				if(counter >= link->triesMAX) {
+				if(counter >= llink->triesMAX) {
 					printf("Unable to disconnect.\n");			
 					return -1;
 				}
@@ -448,7 +448,7 @@ int llclose(int fd, int mode){
 				}
 
 				free(discPackage);
-				alarm(link->timeout);
+				alarm(llink->timeout);
 				
 				//Updates the number of tries
 				counter++;
@@ -510,7 +510,7 @@ int llclose(int fd, int mode){
 				if (counter == 0 || timeExceeded) {
 					timeExceeded = 0;
 
-					if (counter >= link->triesMAX) {
+					if (counter >= llink->triesMAX) {
 						printf("Unable to disconnect.\n");
 						return -1;
 					}
@@ -533,7 +533,7 @@ int llclose(int fd, int mode){
 
 					free(response);
 					counter++;
-					alarm(link->timeout);
+					alarm(llink->timeout);
 				}
 
 				//Allocates memory for the UA response from the transmitter
@@ -556,7 +556,7 @@ int llclose(int fd, int mode){
 		free(discPackage);			
 	}
 
-	free(link);
+	free(llink);
 
 	return 0;
 }
@@ -574,8 +574,12 @@ unsigned int dataStuffing(char* buffer, unsigned int frameSize) {
 			newframeSize++;
 	
 	//Reallocates memory for the buffer, adding more space in the end		
-	buffer = (unsigned char*) realloc(buffer, newframeSize);
-	
+	unsigned char* tmp = (unsigned char*) realloc(buffer, newframeSize);
+	if(tmp == NULL)
+		printf("Realloc failed.\n");
+	else
+		buffer = tmp;	
+			
 	for (i = 1; i < frameSize - 1; i++) {
 	
 		if (buffer[i] == FLAG || buffer[i] == ESCAPE) {
@@ -614,7 +618,11 @@ unsigned int dataDestuffing(char* buffer, unsigned int frameSize){
 	}
 	
 	//Reallocates memory deleting the last position that are not part of the original frame
-	buffer = (unsigned char*) realloc(buffer, frameSize);
+	unsigned char* tmp = (unsigned char*) realloc(buffer, frameSize);
+	if(tmp == NULL)
+		printf("Realloc failed.\n");
+	else
+		buffer = tmp;		
 
 	//Returns the size of the original frame
 	return frameSize;

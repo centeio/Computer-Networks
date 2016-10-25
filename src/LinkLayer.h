@@ -4,6 +4,8 @@
 #include <termios.h>
 #include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
+
 
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
@@ -39,7 +41,7 @@ enum STATE{
 	stop
 } state;
 
-struct linkLayer* link;
+struct linkLayer* llink;
 struct termios oldtio,newtio;
 
 unsigned int timeExceeded;
