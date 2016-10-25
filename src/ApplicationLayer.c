@@ -6,7 +6,7 @@ int writeControlPackage(int control, char* fileName, char* fileSize) {
     unsigned int controlPackageSize = 5 + strlen(fileSize) + strlen(fileName);
 
 	//Initializes control package variable
-    unsigned char controlPackage[controlPackageSize];
+    char controlPackage[controlPackageSize];
 
 	//for loop counter
     int i;
@@ -109,7 +109,7 @@ int send(){
 	fseek(file, 0, SEEK_SET);
 	
 	//Declaration of the array that will store the file size
-	unsigned char sizeString[10];
+	char sizeString[10];
 
 	//Transforms the size of the file into a string
 	sprintf(sizeString, "%u", fileSize);
@@ -141,7 +141,7 @@ int send(){
 	unsigned int packageSequenceNumber = 0;
 	
 	//Iteration that reads while there is something to read
-	while((bytesRead = fread(data + 4, sizeof(unsigned char), application->messageSize, file)) > 0) {
+	while((bytesRead = fread(data + 4, sizeof(char), application->messageSize, file)) > 0) {
 
 		//C - Data which is represented as the number 1
 		data[0] = 1;
@@ -158,7 +158,7 @@ int send(){
 		data[3] = bytesRead & 0xFF;
 		
 		//Calls the LinkLayer function to send the data
-		if(llwrite(application->fd, data, bytesRead + 4) == -1) {
+		if(llwrite(application->fd, (char*)data, bytesRead + 4) == -1) {
 			//Debug: Error message when unable to send data package
 			printf("Unable to write package %d.\n", packageSequenceNumber);
 			return -1;
@@ -201,9 +201,9 @@ int receive(){
 		return -1;
 
 	//Variable initialization
-	FILE* file; 
+	FILE* file = NULL; 
 	char fileName[30] = "";
-	unsigned char fileSize[10] = "";
+	char fileSize[10] = "";
 	unsigned char package[3000];
 
    	memset(package, 0, 3000);
@@ -212,11 +212,11 @@ int receive(){
 
 	while(0 == received){
 		
-		int dataSize = llread(application->fd, package);
+		int dataSize = llread(application->fd, (char*)package);
 		
 		//If llread didn't fail reading the data package	
 		if(dataSize > 0) {
-			printf("%x.\n", package[0]);
+
 			//If the package received is the end package
 			if(3 == package[0])
 				received = 1;
@@ -263,7 +263,7 @@ int receive(){
 				//Prints the data package sequence number
 				printf("Data package: %d.\n", package[1]);
 				int psize = (unsigned char)package[2] << 8 | (unsigned char)package[3]; //(K = 256*L2+L1)
-				fwrite(&package[4], sizeof(unsigned char), psize, file);
+				fwrite(&package[4], sizeof(char), psize, file);
 			}
 		}
 
@@ -284,5 +284,7 @@ int receive(){
 	}
 
 	printf("File transfered successfully.\n");
+	
+	printf("Size of the received file: %s.\n", fileSize);
 	return 0;
 }
