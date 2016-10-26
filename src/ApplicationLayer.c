@@ -44,7 +44,7 @@ int initializeApplicationLayer(char* port, unsigned int messageSize, int retries
     application = (struct applicationLayer*) malloc(sizeof(struct applicationLayer));
     
     //Opens the port and stores the file descriptor in the application structure
-    application->fd = open(port, O_RDWR | O_NOCTTY );
+    application->fd = open(port, O_RDWR | O_NOCTTY);
     
     //Stores the messageSize in the application structure
     application->messageSize = messageSize;
@@ -90,7 +90,7 @@ int initializeApplicationLayer(char* port, unsigned int messageSize, int retries
 
 int send(){
 
-	printf("Start writing\n");
+	printf("Start writing.\n");
 	//Opens the file as a binary file for reading
 	FILE* file = fopen(application->fileName, "rb");
 	if(!file) {

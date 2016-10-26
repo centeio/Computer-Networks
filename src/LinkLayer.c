@@ -3,7 +3,7 @@
 void handleAlarm() {
 	timeExceeded = 1;
 	printf("Alarm called.\n");
- }
+}
 
 int sendMessage(int fd, char* message) {
 	//Debug: Prints message to send
@@ -69,7 +69,7 @@ int receiveMessage(int fd, char* message) {
 	return 0;
 }
 
-int initializeLinkLayer(int fd, char * port, int triesMAX, int timeout) {
+int initializeLinkLayer(int fd, char* port, int triesMAX, int timeout) {
 	
 	//Allocates memory for the linkLayer structure
 	llink = (struct linkLayer*)malloc(sizeof(struct linkLayer));
@@ -289,7 +289,7 @@ int llwrite(int fd, char* buffer, unsigned int length) {
 	//Reset timeExceeded flag
 	timeExceeded = 0;
 
-	return newSize;
+	return 1;
 }
 
 int llread(int fd, char* buffer) {
@@ -335,8 +335,10 @@ int llread(int fd, char* buffer) {
 					size++;
 				}
 				break;
-			default:
+			case 2:
 				STOP = TRUE;
+				break;
+			default:
 				break;
 		}
 	}
@@ -358,7 +360,8 @@ int llread(int fd, char* buffer) {
 	char BCC2 = findBCC2(&buff[4], dataPackageSize);
 	
 	//Only the last bit is considered
-	unsigned int sequenceNumber = (buff[2] >> 7) & 1;
+	//MUDEI DE 7 PARA 6
+	unsigned int sequenceNumber = (buff[2] >> 6) & 1;
 
 	char response[SUPERVISIONPACKAGE * sizeof(char)];
 	response[0] = FLAG;
@@ -385,7 +388,7 @@ int llread(int fd, char* buffer) {
 			
 			//Sends RR as a response			  	
 			response[2] = (llink->sequenceNumber << 7) | C_RR;
-	  }
+		}
 	}
 	else{
 		//If it's duplicate, send RR response with the same sequence number that was updated when the frame was received the first time
