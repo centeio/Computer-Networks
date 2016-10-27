@@ -146,11 +146,11 @@ int llopen(int fd, int status) {
 				free(setPackage);
 		
 				counter++;
+				alarm(llink->timeout);
 			}
 			
 			//Allocates memory to receive the message
 			char* receivedMessage = (char*)malloc(SUPERVISIONPACKAGE * sizeof(char));
-			alarm(llink->timeout);
 		
 			//If a message was read
 			if(receiveMessage(fd, receivedMessage) != -1) {
