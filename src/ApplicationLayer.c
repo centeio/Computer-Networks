@@ -39,58 +39,58 @@ int writeControlPackage(int control, char* fileName, char* fileSize) {
 }
 
 int initializeApplicationLayer(char* port, unsigned int messageSize, int retries, int timeout, char* fileName, int status) {
-    
-    //Allocates memory for application struct
-    application = (struct applicationLayer*) malloc(sizeof(struct applicationLayer));
-    
-    //Opens the port and stores the file descriptor in the application structure
-    application->fd = open(port, O_RDWR | O_NOCTTY);
-    
-    //Stores the messageSize in the application structure
-    application->messageSize = messageSize;
+
+	//Allocates memory for application struct
+	application = (struct applicationLayer*) malloc(sizeof(struct applicationLayer));
+
+	//Opens the port and stores the file descriptor in the application structure
+	application->fd = open(port, O_RDWR | O_NOCTTY );
+
+	//Stores the messageSize in the application structure
+	application->messageSize = messageSize;
 
 	//Checks if the port was successfully opened
-    if (application->fd < 0) {
-        printf("Unable to opening port.\n");
-        return -1;
-    }
+	if (application->fd < 0) {
+		printf("Unable to opening port.\n");
+		return -1;
+	}
 
 	//Stores the mode of the computer: 0 - Receiver, 1 - Transmitter
-    application->status = status;
-    
-    //Stores the file name in the application structure
-    application->fileName = fileName;
+	application->status = status;
+
+	//Stores the file name in the application structure
+	application->fileName = fileName;
 
 	//Initializes link layer
-    if(initializeLinkLayer(application->fd, port, retries, timeout) < 0) {
-        printf("Unable to initialize link layer.\n");
-        return -1;
-    }
-	
+	if(initializeLinkLayer(application->fd, port, retries, timeout) < 0) {
+		printf("Unable to initialize link layer.\n");
+		return -1;
+	}
+
 	//Checks if the computter is in transmitter mode
-    if(application->status == TRANSMITTER)
-        send();
-    //Checks if the computer is in receiver mode
-    else if(application->status == RECEIVER)
-        receive();
-    //Else nothing happens, simply closes the port
-	
+	if(application->status == TRANSMITTER)
+		send();
+	//Checks if the computer is in receiver mode
+	else if(application->status == RECEIVER)
+		receive();
+	//Else nothing happens, simply closes the port
+
 	//Restores the termios
 	if (tcsetattr(application->fd, TCSANOW, &oldtio) == -1) {
-      perror("tcsetattr");
-      return -1;
-    }
+		perror("tcsetattr");
+		return -1;
+	}
 
 	//Closes the port
-    close(application->fd);
+	close(application->fd);
 
 	free(application);
-    return 0;
+	return 0;
 }
 
 int send(){
 
-	printf("Start writing.\n");
+	printf("Start writing\n");
 	//Opens the file as a binary file for reading
 	FILE* file = fopen(application->fileName, "rb");
 	if(!file) {
