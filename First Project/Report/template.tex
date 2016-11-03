@@ -1,0 +1,194 @@
+\documentclass[a4paper]{article}
+
+%use the english line for english reports
+%usepackage[english]{babel}
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{listings}
+
+\begin{document}
+\renewcommand{\figurename}{Fig.}
+
+\setlength{\textwidth}{16cm}
+\setlength{\textheight}{22cm}
+
+\title{\Huge\textbf{First Laboratory Project}\linebreak\linebreak\linebreak
+\Large\textbf{Data Link Protocol}\linebreak\linebreak
+\linebreak\linebreak
+\includegraphics[scale=0.1]{feup-logo.png}\linebreak\linebreak
+\linebreak\linebreak
+\Large{Master in Computer Engineering and Informatics} \linebreak\linebreak
+\Large{Computer Networks}\linebreak
+}
+
+\author{\textbf{Grupo Nodes\_3:}\\
+Carolina Centeio Jorge - up201403090 \\
+Tiago Almeida - up201305665 \\
+\linebreak\linebreak \\
+ \\ Faculdade de Engenharia da Universidade do Porto \\ Rua Roberto Frias, s\/n, 4200-465 Porto, Portugal \linebreak\linebreak\linebreak
+\linebreak\linebreak\vspace{1cm}}
+
+\maketitle
+\thispagestyle{empty}
+
+%************************************************************************************************
+%************************************************************************************************
+
+\newpage
+
+%Todas as figuras devem ser referidas no texto. %\ref{fig:codigoFigura}
+%
+%%Exemplo de código para inserção de figuras
+%%\begin{figure}[h!]
+%%\begin{center}
+%%escolher entre uma das seguintes três linhas:
+%%\includegraphics[height=20cm,width=15cm]{path relativo da imagem}
+%%\includegraphics[scale=0.5]{path relativo da imagem}
+%%\includegraphics{path relativo da imagem}
+%%\caption{legenda da figura}
+%%\label{fig:codigoFigura}
+%%\end{center}
+%%\end{figure}
+%
+%
+%\textit{Para escrever em itálico}
+%\textbf{Para escrever em negrito}
+%Para escrever em letra normal
+%``Para escrever texto entre aspas''
+%
+%Para fazer parágrafo, deixar uma linha em branco.
+%
+%Como fazer bullet points:
+%\begin{itemize}
+	%\item Item1
+	%\item Item2
+%\end{itemize}
+%
+%Como enumerar itens:
+%\begin{enumerate}
+	%\item Item 1
+	%\item Item 2
+%\end{enumerate}
+%
+%\begin{quote}``Isto é uma citação''\end{quote}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Summary}
+
+This laboratorial project was done in the scope of the subject 'Redes de Computadores' of the 'Mestrado Integrado em Engenharia Informática' course in the school year of 2016/2017. All required knowledge and skills were provided both in the theorical and pratical classes of this subject, giving special attention to the Application Layer and Data Link Layer slides. Also, the laboratorial guide was an essential tool for the development, as it contained all the requirements and all the necessary guides for this project.
+
+This project's development was extremely important, since it allowed us to understand better how the theorical concepts are actually applied to real world problems. We concluded that to successfully transfer files between two machines, we must guarantee the integrity of all transfered data and therefore, the usage of a data link protocol is crucial.
+
+
+\section{Introduction}
+
+In the first few practical classes, we learnt how to transfer supervision frames and how to set up an alarm based on a timeout system, so the transmitter knew when to resend data. The goal of this project was to implement a data link protocol between two computers through a serial port and test it by transferring a gif file, although, due to the fact that the file is read as a binary file, other formats would also be supported. The project was developed in a computer with an operating system based on LINUX, using only the C programming language and RS-232 serial ports with asynchronous communication.
+
+This report will explain in better detail the solution we chose to implement for this problem. In the sections 2 and 3, respectively, we describe the project's architecture and structure of the code. Also, in section 4, we demonstrate the main use cases. In the section 5 and 6, we analyze in detail the data link procol and application protocol, respectively. In section 7, we describe the tests that were made to validate the program and present some results and finally, in section 8, we declare the appreciation elements that were implemented.
+
+\section{Project's Architecture}
+
+\subsection{Layers}
+The main program can be divided in two logical parts: the receiver and the transmitter. These parts are set by the input user. There are two layers that allow the program to run, application layer and link layer, these two layers are interconnected. The application layer is responsible for send and receive the buffers and the link layer is responsible for the aspects related with the serial port.
+
+\subsection{Interface}
+When the program initializes the user do the input of some values which then are passed and verified to the respective functions. The interface interacts with the application layer so that after this input the program can start with that values or with values previously established.
+
+\section{Code Structure}
+At the files ApplicationLayer.c and ApplicationLayer.h we implement the application layer. We use a struct to save the data of this layer.
+
+%\begin{figure}[h!]
+	%\centering
+	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
+	%\caption{Initial board set up}
+	%\label{Image: Initial board set up}
+%\end{figure}
+
+The main functions of the application layer are:
+
+%\begin{figure}[h!]
+	%\centering
+	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
+	%\caption{Initial board set up}
+	%\label{Image: Initial board set up}
+%\end{figure}
+
+At the files LinkLayer.c and LinkLayer.h we implement the link layer. We also use a struct to save the data of this layer.
+
+%\begin{figure}[h!]
+	%\centering
+	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
+	%\caption{Initial board set up}
+	%\label{Image: Initial board set up}
+%\end{figure}
+
+The main functions of the link layer are:
+
+%\begin{figure}[h!]
+	%\centering
+	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
+	%\caption{Initial board set up}
+	%\label{Image: Initial board set up}
+%\end{figure}
+
+At the Lab1.c file we create the function main and initialize some variables.
+
+\section{Use Cases}
+
+The application has many use cases. The function llopen is used to establish the connection and the function llclose is used to close the connection. When the program is executed as transmitter, we use the function send to open the file and create the initial buffer (send) which is send by the function llwrite. When the program is executed as receiver, buffers are read through the function llread. The destination file is open so data can be written there with the function receive.
+
+\section{Link Layer Protocol}
+
+This protocol main objective is to organize the file information. However, opposite to the supervision frames, frames used in this protocol send information about the file. In the following code, we can see that all frames have 6 common fields: FLAG (frame[0] and frame[5 + length]), sequence bit (frame[2]), it can be 0 or 1, verification bit (frame[3]), adress field (frame[1]), BCC control field (frame[4 + length]).
+
+%\begin{figure}[h!]
+	%\centering
+	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
+	%\caption{Initial board set up}
+	%\label{Image: Initial board set up}
+%\end{figure}
+
+We also have the following function to find our BCC control field.
+
+%\begin{figure}[h!]
+	%\centering
+	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
+	%\caption{Initial board set up}
+	%\label{Image: Initial board set up}
+%\end{figure}
+
+Our implementation includes a timeout, that is used when the connection is lost. Timeout is a value in seconds, at the end of that time, if the connection is not established the program finish. We also have a variable that says us how many tries can the program do to resendpackages. If timeout didn’t finished and we have already finished all tries of resending, the program finishes without timeout reach the end.
+
+%\begin{figure}[h!]
+	%\centering
+	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
+	%\caption{Initial board set up}
+	%\label{Image: Initial board set up}
+%\end{figure}
+
+\section{Application Protocol}
+
+The application layer contains all the higher-lever protocols. Particularly, this layer opens the port, transfers a file (sending it if it is the transmitter or receiving it if it is the receiver) and closes the port. More specifically, the application layer is responsible for the control packages (start and end) and for the data packages. In the function initializeApplicationLayer (function called in main), the port is opened, the Link Layer is initialized, it then calls send or receive function and closes the port.
+
+In send function, after the connection is established through Link Layer, the Control Package is written and sent as START package. If no errors occur, the data packages (parts of the file that is being transferred) starts being sent. At the end, the Control Package is written and sent as END package and the connection is finished through Link Layer.
+
+In receive function, after the connection is established through Link Layer, the Control Package is received as START package. If no errors occur, the data packages (parts of the file that is being transferred) starts being received and the file is built. At the end, the Control Package is received as END package and the connection is finished through Link Layer.
+
+\section{Validation}
+
+While the implementation was being done, a lot of tests were done to the program, such as, reception capacity, “pinguim.gif” image sending process. We tested with normal conditions, and after we also tested in case of losing and returning connection. In both situations we had the expected response, overcoming duplicated files and
+interruptions in sending packages. Receiving “pinguim.gif” image on the receiver computer was done with success.
+
+\section{Valuing Elements}
+
+This program allows the user to choose the maximum size of the data packages that are going to be sent, how many times the program tries to resend packages in case of error, and even the time it waits to retry it. If any error (through BCC) is detected in a frame and it is a frame that has not been sent before, the receiver send a REJ (reject message) so it can be sent again. The program also checks the size of the file received and compares it to the size of the file sent. If any error that disables the file to be transferred entire and correctly occurs, the program is finished and error is reported to the user.
+
+\section{Conclusion}
+
+\end{document}
