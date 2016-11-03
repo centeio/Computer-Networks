@@ -185,7 +185,11 @@ The main function is in the Lab1.c file, where we store the arguments passed by 
 
 \section{Use Cases}
 
-The application has many use cases. The function llopen is used to establish the connection and the function llclose is used to close the connection. When the program is executed as transmitter, we use the function send to open the file and create the initial buffer (send) which is send by the function llwrite. When the program is executed as receiver, buffers are read through the function llread. The destination file is open so data can be written there with the function receive.
+The program's execution depends on whether the machine is the transmitter or the receiver. However, there are some functions that are executed in both cases, such as \textbf{llopen}, which is used to establish connection between the two machines and \textbf{llclose}, which is used to disconnect the two machines. 
+
+When the program is executed as the transmitter, we open the file for reading using the API function \textbf{open}. After that, we use the function \textbf{writeControlPackge} to send the \textbf{START} package, which uses the \textbf{llwrite} function of the link layer to send the frame. Next, we enter a cycle where the file will continue to be read until there is nothing more to read and in every iteration, a data package is created with the proper header and tail and sent using the \textbf{llwrite} function. Finally, when everything is read, we use the \textbf{writeControlPackage} function to send the \textbf{END} package and close the file with the API function \textbf{close}. 
+
+When the program is executed as the receiver, however, we use the \textbf{llread} function to read the packages sent from the transmitter. Once the \textbf{START} package is read, we open the destination file using the API function \textbf{open} and in every iteration of the cycle, we write to the destination file the information read from the data packages. Once the \textbf{END} package is received, we close the file using the API function \textbf{close} and end the cycle.
 
 \section{Link Layer Protocol}
 
