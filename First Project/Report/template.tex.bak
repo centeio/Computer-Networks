@@ -1,4 +1,4 @@
-\emph{•}\documentclass[a4paper]{article}
+\documentclass[a4paper]{article}
 
 %use the english line for english reports
 %usepackage[english]{babel}
@@ -193,36 +193,94 @@ When the program is executed as the receiver, however, we use the \textbf{llread
 
 \section{Link Layer Protocol}
 
-This protocol main objective is to organize the file information. However, opposite to the supervision frames, frames used in this protocol send information about the file. In the following code, we can see that all frames have 6 common fields: FLAG (frame[0] and frame[5 + length]), sequence bit (frame[2]), it can be 0 or 1, verification bit (frame[3]), address field (frame[1]), BCC control field (frame[4 + length]).
+We implemented 4 functions to control the serial port. 
 
-%\begin{figure}[h!]
-	%\centering
-	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
-	%\caption{Initial board set up}
-	%\label{Image: Initial board set up}
-%\end{figure}
+The first one, llopen, is responsible for establishing the connection through the serial port. A SET frame is sent and then the program waits for an UA command from the receiver, and the the process continues. If something goes wrong, the process restarts a few times. This number of tries is defined in "triesMax".
+ 
+The second one, llwrite receives a buffer and tries to write through the serial port. In case of the answer does not arrive on time, we try to resend it. If the answer is RR command, the message was correctly sent. However, if the answer is a REJ command the message was not sent correctly, so the message is resent. 
 
-We also have the following function to find our BCC control field.
+The third one, llread, receives that message through the serial port. If the message is not valid, we try to solve the problem. A REJ command is sent through the serial port when we have the confirmation that the message was invalid. In case we receive a DISC command, it means that we have to finish the connection. If we send a information message, we save it and then we send a RR command through the serial port. 
+ 
+The fourth one, llclose, finishes the connection through the serial port. Receives the DISC command, telling us that the transmission has finished and resends a new DISC command to the transmitter. Finally, transmitter sends an UA command and it was closed correctly. 
+ 
+We also used the state machine given for this project in receiveMessage function.  We used it to check if the frame received meets the protocol. The following image and code will show.
 
-%\begin{figure}[h!]
-	%\centering
-	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
-	%\caption{Initial board set up}
-	%\label{Image: Initial board set up}
-%\end{figure}
 
-Our implementation includes a timeout, that is used when the connection is lost. Timeout is a value in seconds, at the end of that time, if the connection is not established the program finish. We also have a variable that says us how many tries can the program do to resend packages. If timeout didn't finished and we have already finished all tries of resending, the program finishes without timeout reach the end.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.5\textwidth]{statemachine.jpg}
+	\caption{State Machine}
+	\label{Image: State Machine}
+\end{figure}
 
-%\begin{figure}[h!]
-	%\centering
-	%\includegraphics[width=0.5\textwidth]{boardinit.jpg}
-	%\caption{Initial board set up}
-	%\label{Image: Initial board set up}
-%\end{figure}
+\begin{lstlisting}
+while (FALSE == STOP && !timeExceeded) {       /* loop for input */
+
+		printf("Waiting for message...\n");
+		
+		//Reads one byte
+		res = read(fd, &buf, 1);
+		
+		//State Machine
+		if(1 == res) {
+			
+			if(buf == FLAG) {
+				if(s == bcc) s = stop;
+				else s = flag; 
+			}
+			else if(s == flag && (buf == A_TR || buf == A_RT)) {
+				s = a;
+			}
+			else if(s == a && (buf == C_SET || buf == C_UA || (buf & 0x0F) == C_RR || (buf & 0x0F) == C_REJ || buf == C_DISC)) {
+				s = c;
+			}
+			else if(s == c && buf == (message[1]^message[2])) {
+				s = bcc;
+			}
+			else{
+				s = start;
+				printf("Received something else.\n");
+			}
+
+			if (s == flag) n = 0;
+			else if(s == a) n = 1;
+			else if(s == c) n = 2;
+			else if(s == bcc) n = 3;
+			else if(s == stop) n = 4;
+			else{};
+
+			if(n >= 0) message[n] = buf;
+
+			if (s == stop) STOP = TRUE;
+			
+		} else {
+			printf("Unable to read message.\n");
+			return -1;
+		}
+	printf("Received 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n", message[0], message[1], message[2], message[3], message[4]);	
+	}
+\end{lstlisting}
+
 
 \section{Application Protocol}
 
-The application layer contains all the higher-lever protocols. Particularly, this layer opens the port, transfers a file (sending it if it is the transmitter or receiving it if it is the receiver) and closes the port. More specifically, the application layer is responsible for the control packages (start and end) and for the data packages. In the function initializeApplicationLayer (function called in main), the port is opened, the Link Layer is initialized, it then calls send or receive function and closes the port.
+The application layer contains all the higher-lever protocols. Particularly, this layer opens the port, transfers a file (sending it if it is the transmitter or receiving it if it is the receiver) and closes the port. More specifically, the application layer is responsible for the control packages (start and end) and for the data packages. In the function initializeApplicationLayer (function called in main), the port is opened, the Link Layer is initialized, it then calls send or receive function and closes the port. The following structure functions are used:
+
+\begin{lstlisting}
+struct applicationLayer {
+    int fd;
+    int status; //Connection mode, 0 - Receiver, 1 - Transmitter
+    unsigned int messageSize;
+    char* fileName;
+};
+
+struct applicationLayer* application;
+
+int writeControlPackage(int control, char* fileName, char * fileSize);
+int initializeApplicationLayer(char* port, unsigned int messageSize, int retries, int timeout, char* fileName, int status);
+int send();
+int receive();
+\end{lstlisting}
 
 In send function, after the connection is established through Link Layer, the Control Package is written and sent as START package. If no errors occur, the data packages (parts of the file that is being transferred) starts being sent. At the end, the Control Package is written and sent as END package and the connection is finished through Link Layer.
 
