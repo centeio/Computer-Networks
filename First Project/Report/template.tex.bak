@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\emph{•}\documentclass[a4paper]{article}
 
 %use the english line for english reports
 %usepackage[english]{babel}
@@ -222,23 +222,7 @@ Our implementation includes a timeout, that is used when the connection is lost.
 
 \section{Application Protocol}
 
-The application layer contains all the higher-lever protocols. Particularly, this layer opens the port, transfers a file (sending it if it is the transmitter or receiving it if it is the receiver) and closes the port. More specifically, the application layer is responsible for the control packages (start and end) and for the data packages. In the function initializeApplicationLayer (function called in main), the port is opened, the Link Layer is initialized, it then calls send or receive function and closes the port. The following structure functions are used:
-
-\begin{lstlisting}
-struct applicationLayer {
-    int fd;
-    int status; //Connection mode, 0 - Receiver, 1 - Transmitter
-    unsigned int messageSize;
-    char* fileName;
-};
-
-struct applicationLayer* application;
-
-int writeControlPackage(int control, char* fileName, char * fileSize);
-int initializeApplicationLayer(char* port, unsigned int messageSize, int retries, int timeout, char* fileName, int status);
-int send();
-int receive();
-\end{lstlisting}
+The application layer contains all the higher-lever protocols. Particularly, this layer opens the port, transfers a file (sending it if it is the transmitter or receiving it if it is the receiver) and closes the port. More specifically, the application layer is responsible for the control packages (start and end) and for the data packages. In the function initializeApplicationLayer (function called in main), the port is opened, the Link Layer is initialized, it then calls send or receive function and closes the port.
 
 In send function, after the connection is established through Link Layer, the Control Package is written and sent as START package. If no errors occur, the data packages (parts of the file that is being transferred) starts being sent. At the end, the Control Package is written and sent as END package and the connection is finished through Link Layer.
 
