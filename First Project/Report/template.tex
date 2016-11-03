@@ -232,5 +232,10 @@ interruptions in sending packages. Receiving “pinguim.gif” image on the rece
 This program allows the user to choose the maximum size of the data packages that are going to be sent, how many times the program tries to resend packages in case of error, and even the time it waits to retry it. If any error (through BCC) is detected in a frame and it is a frame that has not been sent before, the receiver send a REJ (reject message) so it can be sent again. The program also checks the size of the file received and compares it to the size of the file sent. If any error that disables the file to be transferred entire and correctly occurs, the program is finished and error is reported to the user.
 
 \section{Conclusion}
+The data transfer between two computers can be reduced to 4 main functions which allow to open the serial port, send and read data and close the port. Those functions are implemented in the link layer, called \textbf{llopen}, \textbf{llwrite}, \textbf{llread} and \textbf{llclose}, respectively. The application layer is responsible for reading the file in predetermined sized packages and create a correct data package to send and also responsible for reading those packages and write them in a new file in the receiver machine.
+
+The laboratory guide was a very important tool for the development of this project and with it's help we were able to build a program capable of sending any file between two machines connected through a RS-232 serial port. We verified that sending a file from one machine to another is a very complex process and it's necessary to deal with a lot of possible errors that might occur during the transfer. 
+
+In sum, this project contributed to a better understanding of the concepts taught in this subject's classes and for a deeper understanding on how serial ports work.
 
 \end{document}
