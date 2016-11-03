@@ -116,7 +116,7 @@ In the first few practical classes, we learnt how to transfer supervision frames
 
 This report will explain in better detail the solution we chose to implement for this problem. In the sections 2 and 3, respectively, we describe the project's architecture and structure of the code. Also, in section 4, we demonstrate the main use cases. In the section 5 and 6, we analyze in detail the data link protocol and application protocol, respectively. In section 7, we describe the tests that were made to validate the program and present some results and finally, in section 8, we declare the appreciation elements that were implemented.
 
-\section{Project's Architecture}
+\section{Architecture}
 
 \subsection{Layers}
 The main program can be divided in two modules, the \textbf{receiver} and the \textbf{transmitter}. Despite this division, the main program is just one and the user is the one who decides which computer is the transmitter and which one is the receiver by passing it as an argument. 
@@ -195,15 +195,15 @@ When the program is executed as the receiver, however, we use the \textbf{llread
 
 We implemented 4 functions to control the serial port. 
 
-The first one, llopen, is responsible for establishing the connection through the serial port. A SET frame is sent and then the program waits for an UA command from the receiver, and the the process continues. If something goes wrong, the process restarts a few times. This number of tries is defined in "triesMax".
+The first one, \textbf{llopen}, is responsible for establishing the connection through the serial port. A \textbf{SET} frame is sent and then the program waits for an \textbf{UA} command from the receiver, and the the process continues. If something goes wrong, the process restarts a few times. This number of tries is defined in "triesMax".
  
-The second one, llwrite receives a buffer and tries to write through the serial port. In case of the answer does not arrive on time, we try to resend it. If the answer is RR command, the message was correctly sent. However, if the answer is a REJ command the message was not sent correctly, so the message is resent. 
+The second one, \textbf{llwrite} receives a buffer and tries to write through the serial port. In case of the answer does not arrive on time, we try to resend it. If the answer is \textbf{RR} command, the message was correctly sent. However, if the answer is a \textbf{REJ} command the message was not sent correctly, so the message is resent. 
 
-The third one, llread, receives that message through the serial port. If the message is not valid, we try to solve the problem. A REJ command is sent through the serial port when we have the confirmation that the message was invalid. In case we receive a DISC command, it means that we have to finish the connection. If we send a information message, we save it and then we send a RR command through the serial port. 
+The third one, \textbf{llread}, receives that message through the serial port. If the message is not valid, we try to solve the problem. A \textbf{REJ} command is sent through the serial port when we have the confirmation that the message was invalid. In case we receive a \textbf{DISC} command, it means that we have to finish the connection. If we send a information message, we save it and then we send a \textbf{RR} command through the serial port. 
  
-The fourth one, llclose, finishes the connection through the serial port. Receives the DISC command, telling us that the transmission has finished and resends a new DISC command to the transmitter. Finally, transmitter sends an UA command and it was closed correctly. 
+The fourth one, \textbf{llclose}, finishes the connection through the serial port. Receives the \textbf{DISC} command, telling us that the transmission has finished and resends a new \textbf{DISC} command to the transmitter. Finally, transmitter sends an \textbf{UA} command and it was closed correctly. 
  
-We also used the state machine given for this project in receiveMessage function.  We used it to check if the frame received meets the protocol. The following image and code will show.
+We also used the state machine given for this project in \textbf{receiveMessage} function.  We used it to check if the frame received meets the protocol. The following image and code will show.
 
 
 \begin{figure}[h!]
@@ -301,6 +301,16 @@ The data transfer between two computers can be reduced to 4 main functions which
 The laboratory guide was a very important tool for the development of this project and with it's help we were able to build a program capable of sending any file between two machines connected through a RS-232 serial port. We verified that sending a file from one machine to another is a very complex process and it's necessary to deal with a lot of possible errors that might occur during the transfer. 
 
 In sum, this project contributed to a better understanding of the concepts taught in this subject's classes and for a deeper understanding on how serial ports work.
+
+\section{Contributions}
+
+Summary, Introduction and Conclusion were made by Tiago Almeida.
+
+Architecture, Code Structure and Use Cases were made by Mónica Fernandes and Tiago Almeida.
+
+Link Layer Protocol and Validation were made by João Fidalgo and Carolina Centeio.
+
+Application Protocol and Valuing Elements were made by Carolina Centeio.
 
 \newpage
 \clearpage
