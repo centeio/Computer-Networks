@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.12)  23 DEC 2016 23:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.10.12)  23 DEC 2016 23:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -626,122 +626,122 @@ File: tuxexp6.jpg Graphic file (type jpg)
 Package pdftex.def Info: tuxexp6.jpg used on input line 218.
 (pdftex.def)             Requested size: 233.45065pt x 146.4995pt.
  [5 <./retrans_tcp.jpg> <./connection_tcp.jpg> <./trans_tcp.jpg> <./quit_tcp.jp
-g>] [6 <./tuxexp6.jpg>] <Exp1.png, id=39, 1355.0625pt x 558.085pt>
+g>] [6 <./tuxexp6.jpg>] <Exp1.png, id=38, 1355.0625pt x 558.085pt>
 File: Exp1.png Graphic file (type png)
  <use Exp1.png>
-Package pdftex.def Info: Exp1.png used on input line 243.
+Package pdftex.def Info: Exp1.png used on input line 241.
 (pdftex.def)             Requested size: 474.27899pt x 195.33267pt.
 
-Overfull \hbox (36.3111pt too wide) in paragraph at lines 243--244
+Overfull \hbox (36.3111pt too wide) in paragraph at lines 241--242
 [][] 
  []
 
-<Exp2-tux1.png, id=40, 1143.27126pt x 141.52875pt>
+<Exp2-tux1.png, id=39, 1143.27126pt x 141.52875pt>
 File: Exp2-tux1.png Graphic file (type png)
  <use Exp2-tux1.png>
-Package pdftex.def Info: Exp2-tux1.png used on input line 248.
+Package pdftex.def Info: Exp2-tux1.png used on input line 246.
 (pdftex.def)             Requested size: 400.15094pt x 49.5358pt.
 
-<Exp2-tux2.png, id=41, 1131.22626pt x 186.6975pt>
+<Exp2-tux2.png, id=40, 1131.22626pt x 186.6975pt>
 File: Exp2-tux2.png Graphic file (type png)
  <use Exp2-tux2.png>
-Package pdftex.def Info: Exp2-tux2.png used on input line 251.
+Package pdftex.def Info: Exp2-tux2.png used on input line 249.
 (pdftex.def)             Requested size: 395.93512pt x 65.3451pt.
 
-<Exp2-tux4.png, id=42, 1145.27875pt x 108.405pt>
+<Exp2-tux4.png, id=41, 1145.27875pt x 108.405pt>
 File: Exp2-tux4.png Graphic file (type png)
  <use Exp2-tux4.png>
-Package pdftex.def Info: Exp2-tux4.png used on input line 254.
+Package pdftex.def Info: Exp2-tux4.png used on input line 252.
 (pdftex.def)             Requested size: 400.85356pt x 37.9423pt.
 LaTeX Font Info:    Font shape `OML/cmr/bx/n' in size <10> not available
-(Font)              Font shape `OML/cmm/b/it' tried instead on input line 257.
+(Font)              Font shape `OML/cmm/b/it' tried instead on input line 255.
 
-<Exp3-Tux1-2.png, id=43, 1092.08pt x 98.3675pt>
+<Exp3-Tux1-2.png, id=42, 1092.08pt x 98.3675pt>
 File: Exp3-Tux1-2.png Graphic file (type png)
  <use Exp3-Tux1-2.png>
-Package pdftex.def Info: Exp3-Tux1-2.png used on input line 259.
+Package pdftex.def Info: Exp3-Tux1-2.png used on input line 257.
 (pdftex.def)             Requested size: 382.23373pt x 34.42912pt.
 
-<Exp3-Tux1-4.png, id=44, 1076.02pt x 190.7125pt>
+<Exp3-Tux1-4.png, id=43, 1076.02pt x 190.7125pt>
 File: Exp3-Tux1-4.png Graphic file (type png)
  <use Exp3-Tux1-4.png>
-Package pdftex.def Info: Exp3-Tux1-4.png used on input line 263.
+Package pdftex.def Info: Exp3-Tux1-4.png used on input line 261.
 (pdftex.def)             Requested size: 376.61266pt x 66.75037pt.
  [7 <./Exp1.png> <./Exp2-tux1.png> <./Exp2-tux2.png> <./Exp2-tux4.png> <./Exp3-
 Tux1-2.png>] <Exp3-Tux4-eth0.png, id=50, 1099.10625pt x 194.7275pt>
 File: Exp3-Tux4-eth0.png Graphic file (type png)
 
 <use Exp3-Tux4-eth0.png>
-Package pdftex.def Info: Exp3-Tux4-eth0.png used on input line 267.
+Package pdftex.def Info: Exp3-Tux4-eth0.png used on input line 265.
 (pdftex.def)             Requested size: 384.69295pt x 68.15564pt.
  <Exp3-Tux4-eth1.png, id=51, 1128.215pt x 217.81375pt>
 File: Exp3-Tux4-eth1.png Graphic file (type png)
 
 <use Exp3-Tux4-eth1.png>
-Package pdftex.def Info: Exp3-Tux4-eth1.png used on input line 271.
+Package pdftex.def Info: Exp3-Tux4-eth1.png used on input line 269.
 (pdftex.def)             Requested size: 394.88116pt x 76.23595pt.
 
 <Exp4-4-withoutRedirect.png, id=52, 1103.12125pt x 370.38374pt>
 File: Exp4-4-withoutRedirect.png Graphic file (type png)
 
 <use Exp4-4-withoutRedirect.png>
-Package pdftex.def Info: Exp4-4-withoutRedirect.png used on input line 276.
+Package pdftex.def Info: Exp4-4-withoutRedirect.png used on input line 274.
 (pdftex.def)             Requested size: 386.09822pt x 129.63625pt.
 
 <Exp4-4-withRedirect.png, id=53, 1080.035pt x 319.1925pt>
 File: Exp4-4-withRedirect.png Graphic file (type png)
 
 <use Exp4-4-withRedirect.png>
-Package pdftex.def Info: Exp4-4-withRedirect.png used on input line 280.
+Package pdftex.def Info: Exp4-4-withRedirect.png used on input line 278.
 (pdftex.def)             Requested size: 378.01791pt x 111.71904pt.
 
 <Exp4-5-NAT.png, id=54, 1089.06876pt x 333.245pt>
 File: Exp4-5-NAT.png Graphic file (type png)
  <use Exp4-5-NAT.png>
-Package pdftex.def Info: Exp4-5-NAT.png used on input line 284.
+Package pdftex.def Info: Exp4-5-NAT.png used on input line 282.
 (pdftex.def)             Requested size: 381.17978pt x 116.63748pt.
  [8 <./Exp3-Tux1-4.png> <./Exp3-Tux4-eth0.png> <./Exp3-Tux4-eth1.png> <./Exp4-4
 -withoutRedirect.png> <./Exp4-4-withRedirect.png>]
 <Exp5-DNS.png, id=58, 1596.96625pt x 208.78pt>
 File: Exp5-DNS.png Graphic file (type png)
  <use Exp5-DNS.png>
-Package pdftex.def Info: Exp5-DNS.png used on input line 288.
+Package pdftex.def Info: Exp5-DNS.png used on input line 286.
 (pdftex.def)             Requested size: 479.09358pt x 62.63448pt.
 
-Overfull \hbox (41.12569pt too wide) in paragraph at lines 288--289
+Overfull \hbox (41.12569pt too wide) in paragraph at lines 286--287
 [][] 
  []
 
 [9 <./Exp4-5-NAT.png> <./Exp5-DNS.png>]
-Overfull \hbox (208.52634pt too wide) in paragraph at lines 337--337
+Overfull \hbox (208.52634pt too wide) in paragraph at lines 335--335
 []\OT1/cmtt/m/n/10 char reply[MESSAGE_SIZE] = "", *usercmd = malloc(sizeof(char
 ) * MESSAGE_SIZE), *passcmd = malloc(sizeof(char) * MESSAGE_SIZE);[] 
  []
 
 [10]
-Overfull \hbox (108.7772pt too wide) in paragraph at lines 377--377
+Overfull \hbox (108.7772pt too wide) in paragraph at lines 375--375
 []   \OT1/cmtt/m/n/10 if(sscanf(reply, "227 Entering Passive Mode (%d,%d,%d,%d,
 %d,%d)\n", &h1, &h2, &h3, &h4, &h5, &h6) != 6){[] 
  []
 
 [11]
-Overfull \hbox (35.27785pt too wide) in paragraph at lines 437--437
+Overfull \hbox (35.27785pt too wide) in paragraph at lines 435--435
 []\OT1/cmtt/m/n/10 int parseURL(char * url, char * host, char * path, char * us
 er, char * pass, char* filename){[] 
  []
 
 [12]
-Overfull \hbox (72.02753pt too wide) in paragraph at lines 464--464
+Overfull \hbox (72.02753pt too wide) in paragraph at lines 462--462
 []\OT1/cmtt/m/n/10 server_addr.sin_addr.s_addr = inet_addr(server_ip); /*32 bit
  Internet address network byte ordered*/[] 
  []
 
 [13] [14] [15] (./template.aux) ) 
 Here is how much of TeX's memory you used:
- 4326 strings out of 493029
- 60216 string characters out of 6136233
+ 4328 strings out of 493029
+ 60248 string characters out of 6136233
  155410 words of memory out of 5000000
- 7777 multiletter control sequences out of 15000+600000
+ 7779 multiletter control sequences out of 15000+600000
  9732 words of font info for 34 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,7n,49p,994b,261s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -756,7 +756,7 @@ are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on template.pdf (15 pages, 1635196 bytes).
+Output written on template.pdf (15 pages, 1633330 bytes).
 PDF statistics:
  117 PDF objects out of 1000 (max. 8388607)
  69 compressed objects within 1 object stream

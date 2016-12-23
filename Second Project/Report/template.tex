@@ -151,7 +151,7 @@ Nesta experiência começamos por configurar a eth0 e eth1 do Tux4 para que cada
 
 A \textit{forwarding table} guarda informações sobre a rede de destino, o \textit{gateway} que faz a ligação a essa rede, a máscara dessa rede e a interface associada.
 
-
+Para esta experiência, o eth0 do Tux4 foi ligada à mesma VLAN que o Tux1 e a eth1 do Tux4 foi ligada à mesma VLAN que o Tux2. Como podemos ver no Anexo 7.3, o Tux1 tanto consegue comunicar com o Tux4, que faz parte da sua VLAN, como também conseguir comunicar com o Tux2 através do Tux4. Conseguirmos observar troca de pacotes ARP e como já referido anteriormente, este servem para corresponder \textit{IP Addresses} a \textit{MAC Addresses}. Os pacotes ICMP observados são gerados pelo comando \textit{ping} e estes "carregam" sempre o \textit{IP Address} e o \textit{MAC Address} de origem assim como o \textit{IP Address} e o \textit{MAC Address} de destino.
 
 \subsection{Configurar um router comercial e implementar NAT}
 
@@ -223,8 +223,6 @@ As três fases são, então:
 Todas as experiências foram realizadas com sucesso e com elas fomos capazes de aplicar os conceitos dados nas aulas teóricas. 
 
 Conclui-se que a configuração de um rede de pequena dimensão é um problema sem grande complexidade, no entanto para a configuração de uma rede de mais dimensão é necessário aprofundar certos conceitos e aprender novos que não foram lecionados nesta unidade curricular.
-
-\textbf{Falar das conclusões da experiência 6, alterações no tráfego quando duas aplicações estão a ser corridas ao mesmo tempo, etc...}.
 
 \section{Contribuições}
 
