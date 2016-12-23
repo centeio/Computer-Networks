@@ -105,15 +105,11 @@ Tiago Almeida - up201305665 \\
 
 \section{Summary}
 
-\textit{CHANGE THIS FOR THIS PROJECT}
-This laboratory project was done in the scope of the subject Computer Networks of the Master in Computer Engineering and Informatics course in the school year of 2016/2017. All required knowledge and skills were provided both in the theoretical and practical classes of this subject, giving special attention to the Application Layer and Data Link Layer slides. Also, the laboratory guide was an essential tool for the development, as it contained all the requirements and all the necessary guides for this project.
-
-This project's development was extremely important, since it allowed us to understand better how the theoretical concepts are actually applied to real world problems. We concluded that to successfully transfer files between two machines, we must guarantee the integrity of all transfered data and therefore, the usage of a data link protocol is crucial.
-
+Este projeto foi desenvolvido no âmbito da disciplina de Redes de Computadores (RCOM) do 3º ano do Mestrado Integrado em Engenharia Informática e Computadores da Faculdade de Engenharia da Universidade do Porto. Todos os conceitos usados neste trabalho foram lecionados tanto nas aulas teóricas como nas aulas teórico-práticas, dando especial atenção aos slides de \textit{Network}. O guia de laboratório foi também extremamente importante, pois continha todos os passos e comandos necessários para a realização deste projeto.
 
 \section{Introdução}
 
-Este projeto foi desenvolvido no âmbito da disciplina de Redes de Computadores do 3º ano do Mestrado Integrado em Engenharia Informática e Computadores da Faculdade de Engenharia da Universidade do Porto. Este projeto consiste em desenvolver uma aplicação através do protocolo FTP (descrito no RFC959) e realizar um conjunto de experiências com o objetivo de consolidar os conceitos lecionados nas aulas teóricas e perceber como configurar uma rede de computadores. Este projeto foi realizado em ambiente \textit{Linux} e desenvolvido em C.
+Este projeto consiste em desenvolver uma aplicação através do protocolo FTP (descrito no RFC959) e realizar um conjunto de experiências com o objetivo de consolidar os conceitos lecionados nas aulas teóricas e perceber como configurar uma rede de computadores. Este projeto foi realizado em ambiente \textit{Linux} e desenvolvido em C.
 
 A aplicação reduz-se a fazer download de um ficheiro, passado como argumento pelo utilizador, de um servidor FTP assim como também é possível especificar o \textit{username} e a \textit{password} se for necessário fazer \textit{login}, com a sintaxe descrita no RFC1738.
 
@@ -146,19 +142,16 @@ O mecanismo de \textit{loopback} é um mecanismo que reenvia uma mensagem de vol
 \subsection{Implementação de duas \textit{Virtual LANS} num switch}
 Nesta experiência foi solicitada a criação de duas VLANS no switch. Para configurar uma VLAN temos de executar o comando “vlan x”, em que x corresponde ao número da vlan, na consola do switch. Depois de configurar as VLANS, foi necessário adicionar as respetivas portas no switch. Para adicionar a porta, basta selecioná-la e usar o comando “interface fastethernet 0/y”, em que y corresponde ao número da porta que queremos adicionar. Antes de adicionar a porta à VLAN com o comando “switchport access vlan x”, devemos alterar o seu modo com o comando “switchport mode access”.
 
-Depois da observação dos logs da experiência 2, podemos concluir que existem 2 broadcast domains, um em cada VLAN. Isto porque foi visto que quando se fazia broadcast no tux1 apenas os tuxs dessa mesma VLAN recebiam os pacotes. Embora os tuxs estejam todos no mesmo switch, os pacotes só eram recebidos por tuxs dentro da mesma VLAN.
+Uma VLAN permite criar uma rede que é inacessível do interior para o exterior e vice versa. Assim, depois da observação dos logs da experiência 2, podemos concluir que existem 2 broadcast domains, um em cada VLAN. Podemos verificar, a partir do anexo 7.2, que quando o tux1 fez um pedido broadcast apenas o tux dessa mesma VLAN (Tux 4) recebeu o request. Embora os tuxs estejam todos no mesmo switch, os pacotes só eram recebidos por tuxs dentro da mesma VLAN.
 
 \subsection{Configurar um \textit{router} em Linux}
-“ARP messages” servem para informar o tux4 quais são os endereços MAC associados ao IP de destino.  
-No tux1 temos a rota da interface eth0 que é criada quando é atribuído o IP a essa interface e uma rota para a rede 172.16.Y0.1 (Y representa o número da bancada) através da gateway 172.16.Y0.254.
+Esta experiência consiste em "ligar" as duas VLANs criada na experiência anterior, fazendo com o Tux4 de comporte como um \textit{router}.
 
-No tux2 temos a rota da interface eth0 e uma rota para a rede 172.16.Y0.1 através da gateway 172.16.Y1.253.
+Nesta experiência começamos por configurar a eth0 e eth1 do Tux4 para que cada uma pertencesse a uma VLAN diferente. Para isso basta configurar os IPs de cada interface de forma a corresponder com a VLAN repetiva, utilizando o comando \textit{ifconfig ethX [IP Address]}, sendo X 0 ou 1. De seguida adicionámos rotas ao Tux1 e ao Tux2 de forma a que seja possível enviar pacotes entre um e outro. Para isso utilizamos o comando \textit{route add -net [IP da subrede] gw [IP Address do gateway]}, em que neste caso o gateway é o Tux4. Sendo, um exemplo deste comando seria \textit{route add -net 172.16.30.0/24 gw 172.16.30.254}. Nesta fase da experiência, o Tux1 e o Tux2 devem ter duas rotas, uma criada automaticamente quando é atribuído um IP à interface \textit{ethernet} e outra que os liga mutuamente através do Tux4. O Tux4 deve ter apenas as duas rotas que são criadas automaticamente para cada um das suas interfaces \textit{ethernet}.
 
-No tux4 temos as rotas das interfaces eth0 e eth1, com este tux conseguimos alcançar as redes 172.16.Y0.1 e 172.16.Y1.1.
+A \textit{forwarding table} guarda informações sobre a rede de destino, o \textit{gateway} que faz a ligação a essa rede, a máscara dessa rede e a interface associada.
 
-A tabela de forwarding contém a informação da rede de destino, a gateway por onde acedemos, a máscara dessa rede e a interface associada.
 
-Visto que os ICMP packets têm sempre o mesmo IP de fonte e destino, estes são observados para quando passarem pelos vários tuxs saberem para onde têm de reencaminhar os pacotes.
 
 \subsection{Configurar um router comercial e implementar NAT}
 
@@ -235,10 +228,47 @@ Conclui-se que a configuração de um rede de pequena dimensão é um problema s
 
 \section{Contribuições}
 
+Sumário, experiência 4 e 5 foram feitos pelo Tiago Almeida.
+
+Introdução, experiência 1 e conclusão foram feitos pela Mónica Fernandes.
+
+Aplicação FTP e experiência 6 foram feitos pela Carolina Centeio.
+
+Experiência 2 e 3 foram feitas pelo João Fidalgo.
+
+\newpage
 \section{Anexos}
 \subsection{Experiência 1}
 
 \includegraphics[scale=0.35]{Exp1.png}
+
+\subsection{Experiência 2}
+
+\subsubsection{Tux 1}
+\includegraphics[scale=0.35]{Exp2-tux1.png}
+
+\subsubsection{Tux 2}
+\includegraphics[scale=0.35]{Exp2-tux2.png}
+
+\subsubsection{Tux 4}
+\includegraphics[scale=0.35]{Exp2-tux4.png}
+
+\subsection{Experiência 3}
+\subsubsection{Tux 1 -\textgreater 2}
+
+\includegraphics[scale=0.35]{Exp3-Tux1-2.png}
+
+\subsubsection{Tux 1 -\textgreater 4}
+
+\includegraphics[scale=0.35]{Exp3-Tux1-4.png}
+
+\subsubsection{Tux 4 - Eth0}
+
+\includegraphics[scale=0.35]{Exp3-Tux4-eth0.png}
+
+\subsubsection{Tux 4 - Eth1}
+
+\includegraphics[scale=0.35]{Exp3-Tux4-eth1.png}
 
 \subsection{Experiência 4}
 \subsubsection{Passo 4 - Sem Redirect}
@@ -256,5 +286,298 @@ Conclui-se que a configuração de um rede de pequena dimensão é um problema s
 \subsection{Experiência 5}
 
 \includegraphics[scale=0.30]{Exp5-DNS.png}
+
+\newpage
+
+\section{Código fonte da aplicação FTP}
+\begin{verbatim}
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+
+#define MESSAGE_SIZE 200
+
+int getip(char *host, char *hostaddr)
+{
+	struct hostent *h = malloc(sizeof(struct hostent));
+
+/*
+struct hostent {
+	char    *h_name;	Official name of the host.
+    char    **h_aliases;	A NULL-terminated array of alternate names for the host.
+	int     h_addrtype;	The type of address being returned; usually AF_INET.
+    int     h_length;	The length of the address in bytes.
+	char    **h_addr_list;	A zero-terminated array of network addresses for the host.
+	Host addresses are in Network Byte Order.
+};
+#define h_addr h_addr_list[0]	The first address in h_addr_list.
+*/
+    if ((h=gethostbyname(host)) == NULL) {
+        herror("gethostbyname");
+        return -1;
+    }
+
+    printf("Host name  : %s\n", h->h_name);
+    printf("IP Address : %s\n",inet_ntoa(*((struct in_addr *)h->h_addr)));
+    strcpy(hostaddr, inet_ntoa(*((struct in_addr *)h->h_addr)));
+	printf("Free h\n");
+    return 0;
+}
+
+int ftpLogin(int socketfd, char* user, char* pass){
+  	printf("Login\n");
+	char reply[MESSAGE_SIZE] = "", *usercmd = malloc(sizeof(char) * MESSAGE_SIZE), *passcmd = malloc(sizeof(char) * MESSAGE_SIZE);
+
+	read(socketfd, reply, MESSAGE_SIZE);
+
+	sprintf(usercmd, "USER %s\n", user);
+  	printf("%s\n", usercmd);
+	write(socketfd, usercmd, strlen(usercmd));
+	read(socketfd, reply, MESSAGE_SIZE);
+	printf("%s\n", reply);
+
+	bzero(reply, strlen(reply));
+
+	sprintf(passcmd, "PASS %s\n", pass);
+  	printf("%s\n", passcmd);
+	write(socketfd, passcmd, strlen(passcmd));
+	read(socketfd, reply, MESSAGE_SIZE);
+
+	printf("%s\n", reply);
+
+	if (reply[0] == '2' && reply[1] == '3' && reply[2]== '0'){
+		free(usercmd);
+		free(passcmd);
+		return 0; //SUCCESS
+	}
+
+	free(usercmd);
+	free(passcmd);
+	return -1;
+
+}
+
+int ftpPasv(int shost, char* host, unsigned int *port){
+	char reply[MESSAGE_SIZE] = "", *command =  "pasv\n";
+  	int h1, h2, h3, h4, h5, h6;
+
+  	bzero(reply, strlen(reply));
+
+	write(shost, command, strlen(command));
+	read(shost, reply, MESSAGE_SIZE);
+
+  	if(sscanf(reply, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)\n", &h1, &h2, &h3, &h4, &h5, &h6) != 6){
+    	printf("Answer does not match for Passive Mode:\n --> %s \n", reply);
+    	return -1;
+  	}
+
+	sprintf(host, "%d.%d.%d.%d", h1, h2, h3, h4);
+	*port = h5*256 + h6;
+
+	return 0;
+}
+
+int ftpDownload(int socketfd, int shost, char* filename, char* path) {
+	char reply[MESSAGE_SIZE] = "", *retrcmd = malloc(sizeof(char) * MESSAGE_SIZE);
+
+	bzero(reply, strlen(reply));
+	sprintf(retrcmd, "retr %s\n", path);
+	printf("Path: %s\nFilename. %s\n", path, filename);
+
+	write(socketfd, retrcmd, strlen(retrcmd));
+	read(socketfd, reply, MESSAGE_SIZE);
+	printf("Reply: %s\n", reply);
+
+
+  if (reply[0] == '1' && reply[1] == '5' && reply[2]== '0') {
+
+    int fd =  open(filename, O_WRONLY | O_CREAT, 0777), nbytes = 0, counter = 0;
+    char* trans = malloc(sizeof(char) * MESSAGE_SIZE);
+
+    while((nbytes = read(shost, trans, MESSAGE_SIZE)) != 0) {
+		if(!(counter % 1000))
+			printf(".");
+		fflush(stdout);
+		counter++;	      
+		write(fd, trans, nbytes);
+	}
+
+	printf("\n");
+
+    close(fd);
+
+    bzero(reply, strlen(reply));
+    read(socketfd, reply, MESSAGE_SIZE);
+
+    if (reply[0] == '2'){
+
+		printf("Download succeeded\n");
+		free(trans);
+		free(retrcmd);
+		return 0; //SUCCESS
+	}
+
+	printf("Download failed\n");
+
+  }
+
+	free(retrcmd);
+	return -1;
+
+}
+
+int parseURL(char * url, char * host, char * path, char * user, char * pass, char* filename){
+
+	int ret = sscanf(url, "ftp://%[^:]:%[^@]@%[^/]/%s\n", user, pass, host, path);
+	if(ret != 4){
+		ret = sscanf(url, "ftp://%[^/]/%s\n", host, path);
+		if (ret != 2) {
+			return -1;
+      	}
+      	strcpy(user, "anonymous");
+      	strcpy(pass, "mail@domain");
+    } //not success
+
+	char * last = strrchr(path,'/');
+	strcpy(filename, last+1);
+
+	printf("Filename: %s\n", filename);
+	return 0; //success
+}
+
+int ftpConnect(char* server_ip, const unsigned int port){
+	//connect socket
+	struct	sockaddr_in server_addr;
+	int sockfd;
+
+	/*server address handling*/
+	bzero((char*)&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = inet_addr(server_ip);	/*32 bit Internet address network byte ordered*/
+	server_addr.sin_port = htons(port);		/*server TCP port must be network byte ordered */
+	/*open an TCP socket*/
+	if ((sockfd = socket(AF_INET,SOCK_STREAM,0)) < 0) {
+		perror("socket()");
+		return -1;
+	}
+
+	/*connect to the server*/
+  if(connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0){	
+        	perror("connect()");
+			return -1;
+	}
+
+	return sockfd;
+}
+
+int main(int argc, char **argv){
+
+	char host[MESSAGE_SIZE] = "";
+	char path[MESSAGE_SIZE] = ""; 
+	char user[MESSAGE_SIZE] = "";
+	char pass[MESSAGE_SIZE] = "";
+	char filename[MESSAGE_SIZE] = "";
+
+
+
+	if(argc != 2){
+		printf("usage: download ftp://[<user>:<password>@]<host>/<url-path> \n");
+		return -1;
+	}
+  	printf("Going to parse\n");
+
+	if(parseURL(argv[1], host, path, user, pass, filename) == -1){
+		printf("url does not match ftp://[<user>:<password>@]<host>/<url-path> \n");
+		return -1;
+	}
+  	printf("Finished parse\n");
+
+	
+	char* hostaddr = malloc(sizeof(char) * MESSAGE_SIZE);
+
+	if(getip(host, hostaddr) != 0){
+		printf("Failed getting ip\n");
+		free(hostaddr);		
+		return -1;
+	}
+
+	unsigned int port = 21, sport;
+
+	printf("Starting connection...\n");
+	printf("%s\n", hostaddr);
+
+	int sockfd = ftpConnect(hostaddr, port);
+
+	printf("ftpconnect done\n");
+
+	if(sockfd == -1){
+		free(hostaddr);
+		printf("Connection failed\n");
+		return -1;
+	}
+
+	//login
+	if(ftpLogin(sockfd, user, pass) != 0){
+	free(hostaddr);
+	close(sockfd);
+    printf("Login failed\n");
+    return -1;
+  }
+
+	printf("Login succeeded\n");
+
+	//passv - calcular a porta
+	char *shost = malloc(sizeof(char)*MESSAGE_SIZE);
+	if(ftpPasv(sockfd, shost, &sport) != 0){
+		printf("Passive Mode Failed\n");
+		free(hostaddr);
+		free(shost);
+		close(sockfd);
+		return -1;
+  }
+
+
+	printf("Passive Mode Established\n");
+	int sockhost = ftpConnect(shost, sport);
+	if(sockhost == -1){
+		printf("Connection failed\n");
+		free(hostaddr);
+		free(shost);
+		close(sockfd);
+		return -1;
+	}
+	//download
+	if(ftpDownload(sockfd, sockhost, filename, path) != 0){
+		free(hostaddr);
+		free(shost);
+		close(sockfd);
+		close(sockhost);
+
+    printf("Download failed\n");
+    return -1;
+  }
+  printf("Download finished\n");
+
+	char* quit = "quit\n";
+	write(sockfd, quit, strlen(quit));
+	write(sockhost, quit, strlen(quit));
+
+	free(hostaddr);
+	free(shost);
+	close(sockfd);
+	close(sockhost);
+
+	return 0;
+
+}
+\end{verbatim}
 
 \end{document}
